@@ -1,6 +1,7 @@
 # PatchGUIlite
 
 [![CI](https://github.com/Hoshiruna/T3PP_Patch_GUI_Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Hoshiruna/T3PP_Patch_GUI_Lite/actions/workflows/ci.yml)
+
 PatchGUIlite is a Windows WPF frontend for Touhou 3rd-party Patch (`.t3pp`) packages. It lets you apply patches to game installs or generate new patch files with a simple UI backed by the native T3pp toolkit and xdelta3.
 
 ## Features
