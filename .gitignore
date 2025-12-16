@@ -1,0 +1,20 @@
+# Build / IDE junk
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.pdb
+*.log
+
+# Native build outputs
+x64/
+T3ppNative/x64/
+
+# Compiled artifacts
+*.exe
+*.lib
+*.exp
+*.aps
+*.zip
+PatchGUI.slnx

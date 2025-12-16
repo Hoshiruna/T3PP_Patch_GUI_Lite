@@ -1,0 +1,752 @@
+﻿<ui:FluentWindow x:Class="PatchGUIlite.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="T3PP补丁器轻量版"
+                 Width="620" Height="420"
+                 MinWidth="580" MinHeight="380"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen">
+
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+
+            <!-- 按钮缩放动效 -->
+            <Style x:Key="AnimatedButtonStyle"
+                   TargetType="ui:Button"
+                   BasedOn="{StaticResource {x:Type ui:Button}}">
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1" ScaleY="1" />
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                     To="1.04"
+                                                     Duration="0:0:0.12" />
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                     To="1.04"
+                                                     Duration="0:0:0.12" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                     To="1.0"
+                                                     Duration="0:0:0.12" />
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                     To="1.0"
+                                                     Duration="0:0:0.12" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- 顶部“补丁 / 生成 / 规则 / 设置”导航按钮样式，内置指示条 -->
+            <Style x:Key="NavRadioButtonStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#1A1A1A"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Width" Value="80"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <Border Background="{TemplateBinding Background}" Padding="0,2">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <Border x:Name="LocalIndicator"
+                                        Height="3"
+                                        Width="36"
+                                        Margin="0,4,0,0"
+                                        Background="#0078D7"
+                                        CornerRadius="1.5"
+                                        Opacity="0"/>
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter TargetName="LocalIndicator" Property="Opacity" Value="1"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 复选框：缩小 + 丝滑微缩放动效 -->
+            <Style x:Key="AnimatedCheckBoxStyle" TargetType="CheckBox">
+                <!-- 整体缩小一点 -->
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Margin" Value="0,2,0,0"/>
+                <!-- 让整个控件在 X 方向轻微缩放，不改默认模板 -->
+                <Setter Property="RenderTransformOrigin" Value="0,0.5"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <!-- Hover 微缩放 -->
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                     To="1.03"
+                                                     Duration="0:0:0.12" />
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                     To="1.03"
+                                                     Duration="0:0:0.12" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                     To="1.0"
+                                                     Duration="0:0:0.12" />
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                     To="1.0"
+                                                     Duration="0:0:0.12" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+
+                    <!-- 勾选时稍微加强一点存在感 -->
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Foreground" Value="#0078D7"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <ui:TitleBar Grid.Row="0"
+                     x:Name="WindowTitleBar"
+                     Title="T3PP补丁器轻量版"
+                     ShowMinimize="True"
+                     ShowMaximize="True"
+                     ShowClose="True" />
+
+        <!-- 主布局 -->
+        <Grid Grid.Row="1" Margin="24,0,24,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 顶部：游戏选择 + 导航 + 当前游戏 -->
+            <StackPanel Grid.Row="0"
+                        Orientation="Vertical"
+                        Margin="0,0,0,15"
+                        ClipToBounds="False">
+
+                <!-- “补丁 / 生成 / 规则” 导航 -->
+                <Grid x:Name="DebugNavBar"
+                      HorizontalAlignment="Left"
+                      Margin="4,-2,0,10"
+                      Visibility="Visible">
+
+                    <StackPanel Orientation="Horizontal">
+                        <!-- 补丁 -->
+                        <RadioButton x:Name="PatchTabRadio"
+                                     Content="补丁"
+                                     IsChecked="True"
+                                     Style="{StaticResource NavRadioButtonStyle}">
+                            <RadioButton.Triggers>
+                                <EventTrigger RoutedEvent="RadioButton.Checked">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PatchView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Visible}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="PatchView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.3"
+                                                             BeginTime="0:0:0.05"/>
+                                            <DoubleAnimation Storyboard.TargetName="PatchViewTranslate"
+                                                             Storyboard.TargetProperty="Y"
+                                                             From="15"
+                                                             To="0"
+                                                             Duration="0:0:0.4">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <DoubleAnimation Storyboard.TargetName="GenerateView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GenerateView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="RuleView"
+                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RuleView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="SettingsView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SettingsView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GameSelectionPanel"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Visible}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </RadioButton.Triggers>
+                        </RadioButton>
+
+                        <!-- 生成 -->
+                        <RadioButton x:Name="GenerateTabRadio"
+                                     Content="生成"
+                                     Style="{StaticResource NavRadioButtonStyle}">
+                            <RadioButton.Triggers>
+                                <EventTrigger RoutedEvent="RadioButton.Checked">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GenerateView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Visible}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="GenerateView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.3"
+                                                             BeginTime="0:0:0.05"/>
+                                            <DoubleAnimation Storyboard.TargetName="GenerateViewTranslate"
+                                                             Storyboard.TargetProperty="Y"
+                                                             From="15"
+                                                             To="0"
+                                                             Duration="0:0:0.4">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <DoubleAnimation Storyboard.TargetName="PatchView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PatchView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="RuleView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RuleView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="SettingsView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SettingsView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GameSelectionPanel"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </RadioButton.Triggers>
+                        </RadioButton>
+
+                        <!-- 规则 -->
+                        <RadioButton x:Name="RuleTabRadio"
+                                     Content="规则"
+                                     Visibility="Collapsed"
+                                     Style="{StaticResource NavRadioButtonStyle}">
+                            <RadioButton.Triggers>
+                                <EventTrigger RoutedEvent="RadioButton.Checked">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RuleView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Visible}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="RuleView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.3"
+                                                             BeginTime="0:0:0.05"/>
+                                            <DoubleAnimation Storyboard.TargetName="RuleViewTranslate"
+                                                             Storyboard.TargetProperty="Y"
+                                                             From="15"
+                                                             To="0"
+                                                             Duration="0:0:0.4">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <DoubleAnimation Storyboard.TargetName="PatchView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PatchView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="GenerateView"
+                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GenerateView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="SettingsView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SettingsView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GameSelectionPanel"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </RadioButton.Triggers>
+                        </RadioButton>
+
+                        <!-- 设置 -->
+                        <RadioButton x:Name="SettingsTabRadio"
+                                     Content="设置"
+                                     Style="{StaticResource NavRadioButtonStyle}" Width="52">
+                            <RadioButton.Triggers>
+                                <EventTrigger RoutedEvent="RadioButton.Checked">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SettingsView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Visible}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="SettingsView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.3"
+                                                             BeginTime="0:0:0.05"/>
+                                            <DoubleAnimation Storyboard.TargetName="SettingsViewTranslate"
+                                                             Storyboard.TargetProperty="Y"
+                                                             From="15"
+                                                             To="0"
+                                                             Duration="0:0:0.4">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <DoubleAnimation Storyboard.TargetName="PatchView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PatchView"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="GenerateView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GenerateView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <DoubleAnimation Storyboard.TargetName="RuleView"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RuleView"
+                                             Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GameSelectionPanel"
+                                                                           Storyboard.TargetProperty="Visibility">
+                                                <DiscreteObjectKeyFrame KeyTime="0"
+                                                                        Value="{x:Static Visibility.Collapsed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </RadioButton.Triggers>
+                        </RadioButton>
+                    </StackPanel>
+
+                    <!-- 导航下划线 -->
+                </Grid>
+                <Grid x:Name="GameSelectionPanel"
+                      HorizontalAlignment="Stretch"
+                      Visibility="Collapsed"/>
+
+                <!-- 游戏选择 + 当前游戏 -->
+            </StackPanel>
+
+            <!-- 三个视图 -->
+            <Grid Grid.Row="1">
+
+                <!-- 补丁页 -->
+                <Grid x:Name="PatchView" Visibility="Visible" Opacity="1">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="PatchViewTranslate" Y="0"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 补丁文件选择 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                    x:Name="SelectPatchButton"
+                                    Appearance="Secondary"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                    Padding="12,8"
+                                   Click="SelectPatchFileButton_Click"
+                                   ToolTip="浏览补丁目录">
+                        </ui:Button>
+
+                        <ui:TextBox Grid.Column="2"
+                                    x:Name="PatchFileTextBox"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    IsReadOnly="True"
+                                    PlaceholderText="请选择补丁文件..." />
+                    </Grid>
+
+                    <!-- 目录选择 & 执行补丁 -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                    x:Name="SelectDirButton"
+                                    Appearance="Secondary"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                    Padding="12,8"
+                                   Click="SelectDirButton_Click"
+                                   ToolTip="浏览游戏安装目录">
+                            选择目录
+                        </ui:Button>
+
+                        <ui:TextBox Grid.Column="2"
+                                    x:Name="DirectoryTextBox"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    IsReadOnly="True"
+                                    PlaceholderText="请选择目标路径..." />
+
+                        <ui:Button Grid.Column="4"
+                                   Appearance="Primary"
+                                   x:Name="RunPatchButton"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                    Padding="24,8"
+                                    Click="RunPatchButton_Click">
+                            执行补丁
+                        </ui:Button>
+                    </Grid>
+
+                    <!-- 校验信息 -->
+                    <Border Grid.Row="4"
+                            CornerRadius="8"
+                            BorderBrush="#19000000"
+                            BorderThickness="1"
+                            Background="#80F9F9F9">
+                        <StackPanel Margin="12"
+                                    Orientation="Vertical">
+                            <TextBlock Text="校验信息"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.7"/>
+                            <TextBlock x:Name="HashCrcText"
+                                       Text="CRC32: N/A"
+                                       FontFamily="Consolas"
+                                       FontSize="12"
+                                       Margin="0,2,0,0"/>
+                            <TextBlock x:Name="HashMd5Text"
+                                       Text="MD5: N/A"
+                                       FontFamily="Consolas"
+                                       FontSize="12"
+                                       Margin="0,2,0,0"/>
+                            <TextBlock x:Name="HashSha1Text"
+                                       Text="SHA-1: N/A"
+                                       FontFamily="Consolas"
+                                       FontSize="12"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 生成页 -->
+                <Grid x:Name="GenerateView" Visibility="Collapsed" Opacity="0">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="GenerateViewTranslate" Y="15"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 模式选择 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:Button Grid.Column="0"
+                                   x:Name="GameSelectButton"
+                                   Appearance="Secondary"
+                                   Style="{StaticResource AnimatedButtonStyle}"
+                                   Padding="12,8"
+                                   Click="GameSelectButton_Click"
+                                   Content="模式选择">
+                            <ui:Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="目录模式" Tag="dir" Click="ModeMenuItem_Click"/>
+                                    <MenuItem Header="文件模式" Tag="file" Click="ModeMenuItem_Click"/>
+                                </ContextMenu>
+                            </ui:Button.ContextMenu>
+                        </ui:Button>
+                        <TextBlock Grid.Column="2"
+                                   x:Name="SelectedGameText"
+                                   Text="当前模式：目录模式"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+
+                    <!-- 顶部：生成参数 -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- 0: 源目录 -->
+                            <RowDefinition Height="10"/>
+                            <!-- 1: 间隔 -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- 2: 目标目录 -->
+                            <RowDefinition Height="10"/>
+                            <!-- 3: 间隔 -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- 4: 对目录进行打包 -->
+                            <RowDefinition Height="16"/>
+                            <!-- 5: 间隔 -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- 6: 开始生成按钮 -->
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 修改前目录/文件 -->
+                        <ui:Button Grid.Row="0" Grid.Column="0"
+                                    x:Name="GenSelectSourceButton"
+                                    Appearance="Secondary"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                    Padding="12,8"
+                                   Content="选择源"
+                                   ToolTip="选择修改前的原始路径"
+                                   Click="GenSelectSourceButton_Click "/>
+                        <ui:TextBox Grid.Row="0" Grid.Column="2"
+                                    x:Name="GenSourceBox"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    IsReadOnly="True"
+                                    PlaceholderText="选择修改前的路径..." />
+
+                        <!-- 修改后目录/文件 -->
+                        <ui:Button Grid.Row="2" Grid.Column="0"
+                                    x:Name="GenSelectTargetButton"
+                                    Appearance="Secondary"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                    Padding="12,8"
+                                   Content="选择目标"
+                                   ToolTip="选择修改后的输出路径"
+                                   Click="GenSelectTargetButton_Click" />
+                        <ui:TextBox Grid.Row="2" Grid.Column="2"
+                                    x:Name="GenTargetBox"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    IsReadOnly="True"
+                                    PlaceholderText="选择修改后的路径..." />
+
+                        <!-- 对目录进行打包：切换“目录模式 / 多文件模式”的开关 -->
+                        <CheckBox Grid.Row="4" Grid.Column="0"
+                                  Grid.ColumnSpan="3"
+                                  x:Name="PackDirectoryCheckBox"
+                                  Content="对目录进行打包"
+                                  Margin="0,4,0,0"
+                                  VerticalAlignment="Center"
+                                  IsChecked="True"
+                                  Style="{StaticResource AnimatedCheckBoxStyle}"
+                                  ToolTip="勾选：按目录进行差分打包；取消：按文件列表模式生成差分（后端可根据此值切换逻辑）"/>
+
+                        <!-- 开始生成（后端可以之后接） -->
+                        <ui:Button Grid.Row="6" Grid.Column="2"
+                                    x:Name="GenStartDiffButton"
+                                    HorizontalAlignment="Right"
+                                    Appearance="Primary"
+                                    Style="{StaticResource AnimatedButtonStyle}"
+                                   Padding="32,8"
+                                   Icon="{ui:SymbolIcon Symbol=Play24}"
+                                   Content="开始生成"
+                                   Click="GenStartDiffButton_Click" />
+                    </Grid>
+                </Grid>
+
+                <!-- 规则页（功能已移除） -->
+                <Grid x:Name="RuleView" Visibility="Collapsed" Opacity="0">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="RuleViewTranslate" Y="15"/>
+                    </Grid.RenderTransform>
+                </Grid>
+
+                <!-- 设置页 -->
+                <Grid x:Name="SettingsView" Visibility="Collapsed" Opacity="0">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="SettingsViewTranslate" Y="15"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0"
+                                Orientation="Vertical"
+                                Margin="0,0,0,12"
+                                Opacity="0.85">
+                        <TextBlock x:Name="SettingsTitleText"
+                                   Text="设置"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock x:Name="LanguageSectionTitle"
+                                   Text="语言切换"
+                                   FontSize="12"
+                                   Opacity="0.7"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="1"
+                            CornerRadius="8"
+                            BorderBrush="#19000000"
+                            BorderThickness="1"
+                            Background="#80F9F9F9">
+                        <StackPanel Margin="12"
+                                    Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock x:Name="LanguageLabel"
+                                           Text="界面语言"
+                                           FontSize="13"
+                                           FontWeight="Medium"
+                                           Margin="0,0,12,0"
+                                           VerticalAlignment="Center"/>
+                                <ComboBox x:Name="LanguageSelector"
+                                          Width="160"
+                                          SelectedIndex="0"
+                                          SelectionChanged="LanguageSelector_SelectionChanged">
+                                    <ComboBoxItem Content="中文" Tag="zh_CN"/>
+                                    <ComboBoxItem Content="English" Tag="en_US"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

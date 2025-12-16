@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+	<UseWindowsForms>true</UseWindowsForms>
+	<Platforms>AnyCPU;ARM64;x86;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Highlighting\Json.xshd" />
+    <None Remove="res\xdelta3.exe" />
+    <None Remove="T3ppNativeLite.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="T3ppNativeLite.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Highlighting\Json.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="res\xdelta3.exe" />
+  </ItemGroup>
+
+  <!-- Copy localization JSONs next to the built executable -->
+  <ItemGroup>
+    <None Include="lang\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageReference Include="WPF-UI" Version="4.0.3" />
+  </ItemGroup>
+
+</Project>

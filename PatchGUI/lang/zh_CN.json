@@ -1,0 +1,53 @@
+﻿{
+  "window.title": "T3PP补丁器轻量版",
+  "nav.patch": "应用补丁",
+  "nav.generate": "生成补丁",
+  "nav.rule": "规则",
+  "nav.settings": "设置",
+
+  "button.gameSelect": "选择模式",
+  "label.currentModeDirectory": "当前模式：目录模式",
+  "label.currentModeFile": "当前模式：文件模式",
+
+  "button.selectDir": "选择目标",
+  "tooltip.selectDir": "浏览目标路径",
+  "placeholder.gameDir": "选择目标目录...",
+  "placeholder.gameFile": "选择目标文件...",
+  "button.selectPatch": "选择补丁",
+  "tooltip.selectPatch": "选择 .t3pp 补丁文件",
+  "placeholder.patchFile": "选择补丁文件...",
+
+  "button.runPatch": "应用补丁",
+  "label.runLog": "运行日志",
+  "status.ready": "就绪",
+
+  "gen.button.source": "选择文件夹",
+  "gen.tooltip.source": "选择修改前的文件夹",
+  "gen.placeholder.source": "选择原始文件夹...",
+  "gen.button.source.file": "选择文件",
+  "gen.tooltip.source.file": "选择修改前的文件",
+  "gen.placeholder.source.file": "选择修改前的文件...",
+  "gen.button.target": "选择文件夹",
+  "gen.tooltip.target": "选择修改后的文件夹",
+  "gen.placeholder.target": "选择修改后的文件夹...",
+  "gen.button.target.file": "选择文件",
+  "gen.tooltip.target.file": "选择修改后的文件",
+  "gen.placeholder.target.file": "选择修改后的文件...",
+  "gen.packDirectory": "打包目录",
+  "gen.packDirectory.tooltip": "开启：按目录生成差分；关闭：按文件列表模式生成。",
+  "gen.button.start": "开始",
+  "gen.log.title": "生成日志",
+  "gen.status.waiting": "等待",
+
+  "rule.button.outputDir": "选择文件夹",
+  "rule.tooltip.outputDir": "选择 JSON 规则输出目录",
+  "rule.placeholder.outputDir": "选择输出目录...",
+  "rule.editor.title": "规则编辑器 (JSON)",
+  "rule.button.generate": "生成规则",
+
+  "settings.title": "设置",
+  "settings.languageSection": "语言",
+  "settings.languageLabel": "界面语言",
+  "settings.language.zh": "中文",
+  "settings.language.en": "英语"
+}
