@@ -637,8 +637,8 @@ namespace PatchGUIlite
                 return;
 
             string securityMessage = metadata.IsSecurityPatch
-                ? "This is a security patch."
-                : "This is a third-party patch; exercise caution when applying.";
+                ? "This is a verified patch."
+                : "This is an unverified patch; exercise caution when applying.";
             System.Windows.MessageBox.Show(this, securityMessage, "Info",
                 MessageBoxButton.OK, MessageBoxImage.Information);
 
