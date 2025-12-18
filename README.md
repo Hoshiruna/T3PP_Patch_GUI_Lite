@@ -48,7 +48,7 @@ Output: `PatchGUI/bin/Release/net8.0-windows7.0/win-x64/publish/PatchGUIlite.exe
 1. Choose the target mode (directory or file) from the toolbar.
 2. Select the target directory/file.
 3. Select a `.t3pp` patch file.
-4. Click **Run Patch** to apply. Progress and native logs appear in the console area.
+4. Click **Apply Patch** to apply. Progress and native logs appear in the console area.
 
 ### Generate a patch 
 1. Select the mode for generate patch (`file` or `directory`)
