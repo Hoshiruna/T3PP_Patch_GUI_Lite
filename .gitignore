@@ -17,6 +17,5 @@ T3ppNative/x64/
 *.exp
 *.aps
 *.zip
-PatchGUI.slnx
-
-!PatchGUI/res/xdelta3.exe
+*.slnx
+!PatchGUIlite/res/xdelta3.exe

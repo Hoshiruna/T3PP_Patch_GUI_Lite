@@ -1,13 +1,15 @@
 {
-  "window.title": "Patch Tool",
-  "nav.patch": "Patch",
-  "nav.generate": "Generate",
+  "window.title": "T3pp Patch Tool",
+  "nav.patch": "Apply Patch",
+  "nav.generate": "Generate Patch",
   "nav.rule": "Rules",
   "nav.settings": "Settings",
 
   "button.gameSelect": "Select Mode",
   "label.currentModeDirectory": "Current mode: Directory",
   "label.currentModeFile": "Current mode: File",
+  "menu.mode.directory": "Directory Mode",
+  "menu.mode.file": "File Mode",
 
   "button.selectDir": "Select Target",
   "tooltip.selectDir": "Browse target path",
@@ -18,8 +20,7 @@
   "placeholder.patchFile": "Select a patch file...",
 
   "button.runPatch": "Apply Patch",
-  "label.runLog": "Run Log",
-  "status.ready": "Ready",
+  "label.hashInfo": "Info",
 
   "gen.button.source": "Select Folder",
   "gen.tooltip.source": "Choose the original folder (before changes)",
@@ -35,19 +36,29 @@
   "gen.placeholder.target.file": "Pick the modified file...",
   "gen.packDirectory": "Package directory",
   "gen.packDirectory.tooltip": "On: diff by directory; Off: file-list mode (backend can switch).",
-  "gen.button.start": "Start",
-  "gen.log.title": "Generate Log",
-  "gen.status.waiting": "Waiting",
-
-  "rule.button.outputDir": "Select Folder",
-  "rule.tooltip.outputDir": "Choose JSON rule output folder",
-  "rule.placeholder.outputDir": "Select output folder...",
-  "rule.editor.title": "Rule Editor (JSON)",
-  "rule.button.generate": "Generate Rules",
+  "gen.button.start": "Generate Patch",
 
   "settings.title": "Settings",
   "settings.languageSection": "Language",
   "settings.languageLabel": "UI Language",
   "settings.language.zh": "Chinese",
-  "settings.language.en": "English"
+  "settings.language.en": "English",
+  "settings.updateSection": "Updates",
+  "settings.updateLabel": "Update status",
+  "settings.updateButton": "Check for Updates",
+  "update.status.ready": "Ready",
+  "update.status.checking": "Checking for updates...",
+  "update.status.updateAvailable": "Update available.",
+  "update.status.downloading": "Downloading update...",
+  "update.status.extracting": "Extracting update...",
+  "update.status.readyToInstall": "Update ready to install.",
+  "update.status.closing": "Closing to install update...",
+  "update.status.uptodate": "Already up to date.",
+  "update.status.failed": "Update failed.",
+  "update.status.checkFailed": "Failed to check the remote version.",
+  "update.status.releaseMissing": "Release information not available.",
+  "update.status.assetMissing": "Release package not found.",
+  "update.status.downloadFailed": "Download failed.",
+  "update.status.extractFailed": "Invalid update package.",
+  "update.status.applyFailed": "Failed to start updater."
 }

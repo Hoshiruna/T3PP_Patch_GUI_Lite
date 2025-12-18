@@ -252,6 +252,7 @@
                         <!-- 生成 -->
                         <RadioButton x:Name="GenerateTabRadio"
                                      Content="生成"
+                                     Width="120"
                                      Style="{StaticResource NavRadioButtonStyle}">
                             <RadioButton.Triggers>
                                 <EventTrigger RoutedEvent="RadioButton.Checked">
@@ -514,6 +515,7 @@
                                     Appearance="Secondary"
                                     Style="{StaticResource AnimatedButtonStyle}"
                                     Padding="12,8"
+                                    IsEnabled="False"
                                    Click="SelectDirButton_Click"
                                    ToolTip="浏览游戏安装目录">
                             选择目录
@@ -544,7 +546,8 @@
                             Background="#80F9F9F9">
                         <StackPanel Margin="12"
                                     Orientation="Vertical">
-                            <TextBlock Text="校验信息"
+                            <TextBlock x:Name="HashInfoTitleText"
+                                       Text="校验信息"
                                        FontWeight="SemiBold"
                                        Opacity="0.7"/>
                             <TextBlock x:Name="HashCrcText"
@@ -593,8 +596,12 @@
                                    Content="模式选择">
                             <ui:Button.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="目录模式" Tag="dir" Click="ModeMenuItem_Click"/>
-                                    <MenuItem Header="文件模式" Tag="file" Click="ModeMenuItem_Click"/>
+                                    <MenuItem Header="目录模式"
+                                              Tag="dir"
+                                              Click="ModeMenuItem_Click"/>
+                                    <MenuItem Header="文件模式"
+                                              Tag="file"
+                                              Click="ModeMenuItem_Click"/>
                                 </ContextMenu>
                             </ui:Button.ContextMenu>
                         </ui:Button>
@@ -680,6 +687,7 @@
                                     HorizontalAlignment="Right"
                                     Appearance="Primary"
                                     Style="{StaticResource AnimatedButtonStyle}"
+                                   MinWidth="120"
                                    Padding="32,8"
                                    Icon="{ui:SymbolIcon Symbol=Play24}"
                                    Content="开始生成"
@@ -713,10 +721,6 @@
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,8"/>
-                        <TextBlock x:Name="LanguageSectionTitle"
-                                   Text="语言切换"
-                                   FontSize="12"
-                                   Opacity="0.7"/>
                     </StackPanel>
 
                     <Border Grid.Row="1"
@@ -726,6 +730,11 @@
                             Background="#80F9F9F9">
                         <StackPanel Margin="12"
                                     Orientation="Vertical">
+                            <TextBlock x:Name="LanguageSectionTitle"
+                                       Text="语言切换"
+                                       FontSize="12"
+                                       Opacity="0.7"
+                                       Margin="0,0,0,6"/>
                             <StackPanel Orientation="Horizontal"
                                         VerticalAlignment="Center">
                                 <TextBlock x:Name="LanguageLabel"
@@ -742,6 +751,42 @@
                                     <ComboBoxItem Content="English" Tag="en_US"/>
                                 </ComboBox>
                             </StackPanel>
+
+                            <Separator Margin="0,12,0,10" Opacity="0.35"/>
+
+                            <TextBlock x:Name="UpdateSectionTitle"
+                                       Text="Updates"
+                                       FontSize="12"
+                                       Opacity="0.7"/>
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="UpdateStatusLabel"
+                                           Grid.Column="0"
+                                           Text="Status"
+                                           FontSize="13"
+                                           FontWeight="Medium"
+                                           Margin="0,0,12,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock x:Name="UpdateStatusText"
+                                           Grid.Column="1"
+                                           Text="Ready"
+                                           FontSize="13"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <ui:Button Grid.Column="2"
+                                           x:Name="PullUpdatesButton"
+                                           Appearance="Secondary"
+                                           Style="{StaticResource AnimatedButtonStyle}"
+                                           Padding="12,6"
+                                           Margin="12,0,0,0"
+                                           Click="PullUpdatesButton_Click">
+                                    Check for Updates
+                                </ui:Button>
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </Grid>

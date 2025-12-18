@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,8 +37,13 @@ namespace PatchGUIlite
         private static readonly string ErrorLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log");
         private static readonly string RunLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "run.log");
         private CancellationTokenSource? _patchCts;
+        private bool _isUpdating;
+        private string _updateStatusKey = "update.status.ready";
+        private string _updateStatusFallback = "Ready";
+        private bool _isInitializing;
         public MainWindow()
         {
+            _isInitializing = true;
             InitializeComponent();
 
             PatchGUIlite.Core.T3ppDiff.DebugLog = msg => AppendConsoleLine(msg);
@@ -46,28 +52,19 @@ namespace PatchGUIlite
             LocalizationManager.LoadLanguage("zh_CN");
             ApplyLocalization();
             LanguageSelector.SelectedIndex = 0;
+            _isInitializing = false;
 
         }
 
         #region Init
         private void InitMode()
         {
-#if DEBUG
             DebugNavBar.Visibility = Visibility.Visible;
 
             PatchView.Visibility = Visibility.Visible; PatchView.Opacity = 1;
             GenerateView.Visibility = Visibility.Collapsed; GenerateView.Opacity = 0;
             SettingsView.Visibility = Visibility.Collapsed; SettingsView.Opacity = 0;
             GameSelectionPanel.Visibility = Visibility.Visible;
-#else
-            //
-            DebugNavBar.Visibility = Visibility.Collapsed;
-
-            PatchView.Visibility = Visibility.Visible; PatchView.Opacity = 1;
-            GenerateView.Visibility = Visibility.Collapsed; GenerateView.Opacity = 0;
-            SettingsView.Visibility = Visibility.Collapsed; SettingsView.Opacity = 0;
-            GameSelectionPanel.Visibility = Visibility.Visible;
-#endif
         }
 
         #endregion
@@ -99,6 +96,7 @@ namespace PatchGUIlite
             PatchFileTextBox.Text = string.Empty;
             DirectoryTextBox.Text = string.Empty;
             _selectedPatchPath = null;
+            SelectDirButton.IsEnabled = false;
             UpdateHashDisplay(null);
 
             // Sync pack option with mode
@@ -133,6 +131,7 @@ namespace PatchGUIlite
             {
                 PatchFileTextBox.Text = _selectedPatchPath;
             }
+            SelectDirButton.IsEnabled = true;
             return _selectedPatchPath;
         }
         private void SelectDirButton_Click(object sender, RoutedEventArgs e)
@@ -206,6 +205,7 @@ namespace PatchGUIlite
             {
                 _selectedPatchPath = dialog.FileName;
                 PatchFileTextBox.Text = _selectedPatchPath;
+                SelectDirButton.IsEnabled = true;
                 AppendConsoleLine($"[INFO] Selected patch: {_selectedPatchPath}");
                 ApplyPatchModeFromFile(_selectedPatchPath);
                 // Re-validate hashes if in file mode
@@ -701,6 +701,13 @@ namespace PatchGUIlite
             if (_hashSha1Text != null) _hashSha1Text.Text = $"SHA-1: {sha1}";
         }
 
+        private void SetUpdateStatus(string key, string fallback)
+        {
+            _updateStatusKey = key;
+            _updateStatusFallback = fallback;
+            UpdateStatusText.Text = L(key, fallback);
+        }
+
         private bool VerifyHashes(string path)
         {
             var hashes = ComputeHashes(path);
@@ -804,6 +811,26 @@ namespace PatchGUIlite
             SelectedGameText.Text = _useDirectoryMode
                 ? L("label.currentModeDirectory", "Current mode: Directory")
                 : L("label.currentModeFile", "Current mode: File");
+            if (GameSelectButton.ContextMenu is ContextMenu modeMenu)
+            {
+                foreach (object? item in modeMenu.Items)
+                {
+                    if (item is not MenuItem menuItem)
+                    {
+                        continue;
+                    }
+
+                    string tag = menuItem.Tag?.ToString() ?? string.Empty;
+                    if (string.Equals(tag, DirectoryModeTag, StringComparison.OrdinalIgnoreCase))
+                    {
+                        menuItem.Header = L("menu.mode.directory", "Directory Mode");
+                    }
+                    else if (string.Equals(tag, FileModeTag, StringComparison.OrdinalIgnoreCase))
+                    {
+                        menuItem.Header = L("menu.mode.file", "File Mode");
+                    }
+                }
+            }
 
             SelectDirButton.Content = L("button.selectDir", "Select Target");
             SelectDirButton.ToolTip = L("tooltip.selectDir", "Browse target path");
@@ -815,6 +842,7 @@ namespace PatchGUIlite
             PatchFileTextBox.PlaceholderText = L("placeholder.patchFile", "Select a patch file...");
             SetHashTexts(_crc32 ?? "N/A", _md5 ?? "N/A", _sha1 ?? "N/A");
             RunPatchButton.Content = L("button.runPatch", "Apply Patch");
+            HashInfoTitleText.Text = L("label.hashInfo", "Validation Information");
 
             string genSourceLabel = _useDirectoryMode
                 ? L("gen.button.source", "Select Folder")
@@ -851,6 +879,10 @@ namespace PatchGUIlite
             SettingsTitleText.Text = L("settings.title", "Settings");
             LanguageSectionTitle.Text = L("settings.languageSection", "Language");
             LanguageLabel.Text = L("settings.languageLabel", "UI Language");
+            UpdateSectionTitle.Text = L("settings.updateSection", "Updates");
+            UpdateStatusLabel.Text = L("settings.updateLabel", "Update status");
+            PullUpdatesButton.Content = L("settings.updateButton", "Check for Updates");
+            UpdateStatusText.Text = L(_updateStatusKey, _updateStatusFallback);
 
             foreach (var item in LanguageSelector.Items)
             {
@@ -880,6 +912,9 @@ namespace PatchGUIlite
 
         private void LanguageSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_isInitializing)
+                return;
+
             if (LanguageSelector.SelectedItem is ComboBoxItem item)
             {
                 string lang = item.Tag?.ToString() ?? "zh";
@@ -888,6 +923,164 @@ namespace PatchGUIlite
                     LocalizationManager.LoadLanguage(lang);
                 }
                 ApplyLocalization();
+            }
+        }
+
+        private async void PullUpdatesButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdating)
+                return;
+
+            _isUpdating = true;
+            PullUpdatesButton.IsEnabled = false;
+            SetUpdateStatus("update.status.checking", "Checking for updates...");
+            bool shouldExit = false;
+
+            try
+            {
+                string localVersion = UpdateService.ReadLocalVersion();
+                string? remoteVersion = await UpdateService.FetchRemoteVersionAsync();
+                if (string.IsNullOrWhiteSpace(remoteVersion))
+                {
+                    SetUpdateStatus("update.status.checkFailed", "Failed to check the remote version.");
+                    System.Windows.MessageBox.Show(this,
+                        "Failed to read the remote version file from GitHub.",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                string localDisplay = string.IsNullOrWhiteSpace(localVersion) ? "unknown" : localVersion;
+                if (!UpdateService.IsRemoteVersionNewer(remoteVersion, localVersion))
+                {
+                    SetUpdateStatus("update.status.uptodate", "Already up to date.");
+                    System.Windows.MessageBox.Show(this,
+                        "Already up to date.",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
+                SetUpdateStatus("update.status.updateAvailable", "Update available.");
+                (UpdatePackage? package, UpdatePackageFailure failure) = await UpdateService.FetchLatestPackageAsync();
+                if (package == null)
+                {
+                    if (failure == UpdatePackageFailure.ReleaseMissing)
+                    {
+                        SetUpdateStatus("update.status.releaseMissing", "Release information not available.");
+                        System.Windows.MessageBox.Show(this,
+                            "Failed to load release information from GitHub.",
+                            "Update",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
+
+                    SetUpdateStatus("update.status.assetMissing", "Release package not found.");
+                    System.Windows.MessageBox.Show(this,
+                        "No .zip release package was found. Publish a release asset first.",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                string tempRoot = Path.Combine(Path.GetTempPath(), $"PatchGUIlite_update_{Guid.NewGuid():N}");
+                Directory.CreateDirectory(tempRoot);
+                string zipName = string.IsNullOrWhiteSpace(package.FileName) ? "PatchGUIlite_update.zip" : package.FileName;
+                string zipPath = Path.Combine(tempRoot, zipName);
+
+                SetUpdateStatus("update.status.downloading", "Downloading update...");
+                if (!await UpdateService.DownloadFileAsync(package.DownloadUrl, zipPath))
+                {
+                    SetUpdateStatus("update.status.downloadFailed", "Download failed.");
+                    System.Windows.MessageBox.Show(this,
+                        "Failed to download the release package.",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                SetUpdateStatus("update.status.extracting", "Extracting update...");
+                string extractRoot = Path.Combine(tempRoot, "extract");
+                Directory.CreateDirectory(extractRoot);
+                try
+                {
+                    ZipFile.ExtractToDirectory(zipPath, extractRoot, true);
+                }
+                catch (Exception ex)
+                {
+                    SetUpdateStatus("update.status.extractFailed", "Invalid update package.");
+                    System.Windows.MessageBox.Show(this,
+                        $"Failed to extract the update package: {ex.Message}",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                string? sourceDir = UpdateService.FindUpdateSourceDirectory(extractRoot);
+                if (string.IsNullOrWhiteSpace(sourceDir) || !Directory.Exists(sourceDir))
+                {
+                    SetUpdateStatus("update.status.extractFailed", "Invalid update package.");
+                    System.Windows.MessageBox.Show(this,
+                        "The update package does not contain PatchGUIlite.exe.",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                string targetDir = AppDomain.CurrentDomain.BaseDirectory;
+                string exePath = Process.GetCurrentProcess().MainModule?.FileName
+                                 ?? Path.Combine(targetDir, "PatchGUIlite.exe");
+
+                SetUpdateStatus("update.status.readyToInstall", "Update ready to install.");
+                var result = System.Windows.MessageBox.Show(this,
+                    $"Update downloaded.{Environment.NewLine}Local: {localDisplay}{Environment.NewLine}Remote: {remoteVersion}{Environment.NewLine}{Environment.NewLine}The app will close to install the update. Continue?",
+                    "Update",
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Information);
+                if (result != MessageBoxResult.OK)
+                {
+                    SetUpdateStatus("update.status.readyToInstall", "Update ready to install.");
+                    return;
+                }
+
+                if (!UpdateService.StartUpdateApply(sourceDir, targetDir, exePath, Process.GetCurrentProcess().Id, out string? error))
+                {
+                    SetUpdateStatus("update.status.applyFailed", "Failed to start updater.");
+                    System.Windows.MessageBox.Show(this,
+                        $"Failed to start the updater: {error}",
+                        "Update",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                shouldExit = true;
+                SetUpdateStatus("update.status.closing", "Closing to install update...");
+                System.Windows.Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                SetUpdateStatus("update.status.failed", "Update failed.");
+                System.Windows.MessageBox.Show(this,
+                    $"Update failed: {ex.Message}",
+                    "Update",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (!shouldExit)
+                {
+                    PullUpdatesButton.IsEnabled = true;
+                    _isUpdating = false;
+                }
             }
         }
 

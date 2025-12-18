@@ -1,8 +1,8 @@
-# PatchGUIlite
+# T3PP_PatchGUIlite
 
 [![CI](https://github.com/Hoshiruna/T3PP_Patch_GUI_Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Hoshiruna/T3PP_Patch_GUI_Lite/actions/workflows/ci.yml)
 
-PatchGUIlite is a Windows WPF frontend for Touhou 3rd-party Patch (`.t3pp`) packages. It lets you apply patches to game installs or generate new patch files with a simple UI backed by the native T3pp toolkit and xdelta3.
+T3PP_PatchGUIlite is a Windows WPF frontend for Touhou 3rd-party Patch (`.t3pp`) packages. It lets you apply patches to game installs or generate new patch files with a simple UI backed by the native T3pp toolkit and xdelta3.
 
 ## Features
 - Apply `.t3pp` patches to a directory or single file, with hash readout (CRC32/MD5/SHA1) for the target.
@@ -31,6 +31,12 @@ Keep these files next to the executable:
 - `T3ppNativeLite.dll`
 - `lang/` folder (`zh_CN.json`, `en_US.json`)
 
+## Updates (Release ZIP)
+- Use **Settings → Updates → Check for Updates** to compare the EXE metadata version with the GitHub `version`.
+- If a newer version exists, the app downloads the latest GitHub Release `.zip`, extracts it, and then closes to replace local files.
+- Publish a `.zip` asset in the latest release so the updater can find it.
+- Bump `PatchGUIlite/version.txt` and the version fields in `PatchGUIlite/PatchGUIlite.csproj` when publishing a new version.
+
 ## Publish (self-contained)
 ```bash
 dotnet publish PatchGUI/PatchGUIlite.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
@@ -44,10 +50,11 @@ Output: `PatchGUI/bin/Release/net8.0-windows7.0/win-x64/publish/PatchGUIlite.exe
 3. Select a `.t3pp` patch file.
 4. Click **Run Patch** to apply. Progress and native logs appear in the console area.
 
-### Generate a patch
-1. Select source (`old`) and target (`new`) directories.
-2. (Optional) Keep `Pack directory` enabled to bundle outputs.
-3. Click **Generate Patch** to create a `.t3pp` file.
+### Generate a patch 
+1. Select the mode for generate patch (`file` or `directory`)
+2. Select the source directory or file (`Original`) and the destination directory or file (`Modified`).
+3. (Optional) Keep `Pack directory` enabled to bundle outputs.
+4. Click **Generate Patch** to create a `.t3pp` file.
 
 ## Localization
 Language files live in `PatchGUI/lang/*.json`. To add a language, provide a new JSON file and wire it into the language selector in `MainWindow.xaml` / code-behind.

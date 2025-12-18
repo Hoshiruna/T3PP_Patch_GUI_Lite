@@ -8,6 +8,8 @@
   "button.gameSelect": "选择模式",
   "label.currentModeDirectory": "当前模式：目录模式",
   "label.currentModeFile": "当前模式：文件模式",
+  "menu.mode.directory": "目录模式",
+  "menu.mode.file": "文件模式",
 
   "button.selectDir": "选择目标",
   "tooltip.selectDir": "浏览目标路径",
@@ -18,8 +20,7 @@
   "placeholder.patchFile": "选择补丁文件...",
 
   "button.runPatch": "应用补丁",
-  "label.runLog": "运行日志",
-  "status.ready": "就绪",
+  "label.hashInfo": "校验信息",
 
   "gen.button.source": "选择文件夹",
   "gen.tooltip.source": "选择修改前的文件夹",
@@ -35,19 +36,30 @@
   "gen.placeholder.target.file": "选择修改后的文件...",
   "gen.packDirectory": "打包目录",
   "gen.packDirectory.tooltip": "开启：按目录生成差分；关闭：按文件列表模式生成。",
-  "gen.button.start": "开始",
-  "gen.log.title": "生成日志",
-  "gen.status.waiting": "等待",
+  "gen.button.start": "生成补丁",
 
-  "rule.button.outputDir": "选择文件夹",
-  "rule.tooltip.outputDir": "选择 JSON 规则输出目录",
-  "rule.placeholder.outputDir": "选择输出目录...",
-  "rule.editor.title": "规则编辑器 (JSON)",
-  "rule.button.generate": "生成规则",
 
   "settings.title": "设置",
   "settings.languageSection": "语言",
   "settings.languageLabel": "界面语言",
   "settings.language.zh": "中文",
-  "settings.language.en": "英语"
+  "settings.language.en": "英语",
+  "settings.updateSection": "更新",
+  "settings.updateLabel": "更新状态",
+  "settings.updateButton": "检查更新",
+  "update.status.ready": "就绪",
+  "update.status.checking": "正在检查更新...",
+  "update.status.updateAvailable": "发现新版本。",
+  "update.status.downloading": "正在下载更新...",
+  "update.status.extracting": "正在解压更新...",
+  "update.status.readyToInstall": "更新已准备安装。",
+  "update.status.closing": "正在关闭以安装更新...",
+  "update.status.uptodate": "已是最新版本。",
+  "update.status.failed": "更新失败。",
+  "update.status.checkFailed": "无法检查远程版本。",
+  "update.status.releaseMissing": "无法获取发行版本信息。",
+  "update.status.assetMissing": "未找到发行版压缩包。",
+  "update.status.downloadFailed": "下载失败。",
+  "update.status.extractFailed": "更新包无效。",
+  "update.status.applyFailed": "无法启动更新程序。"
 }
