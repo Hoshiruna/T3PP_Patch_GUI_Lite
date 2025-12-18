@@ -21,7 +21,7 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore PatchGUI/PatchGUIlite.csproj
+        run: dotnet restore PatchGUIlite/PatchGUIlite.csproj
 
       - name: Build (Release)
-        run: dotnet build PatchGUI/PatchGUIlite.csproj -c Release --no-restore
+        run: dotnet build PatchGUIlite/PatchGUIlite.csproj -c Release --no-restore
