@@ -60,5 +60,5 @@ Output: `PatchGUI/bin/Release/net8.0-windows7.0/win-x64/publish/PatchGUIlite.exe
 Language files live in `PatchGUI/lang/*.json`. To add a language, provide a new JSON file and wire it into the language selector in `MainWindow.xaml` / code-behind.
 
 ## Development notes
-- Navigation tabs are hidden in Release builds unless enabled via `#if DEBUG` logic in `InitMode()`.
+- The run.log file is now only output in debug.
 - UI is built with [Wpf.Ui](https://github.com/lepoco/wpfui); code editing view uses [AvalonEdit](https://github.com/icsharpcode/AvalonEdit).
