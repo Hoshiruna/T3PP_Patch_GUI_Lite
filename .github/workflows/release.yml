@@ -23,7 +23,7 @@ jobs:
 
       - name: Publish (Self-contained, single file)
         run: >
-          dotnet publish PatchGUI/PatchGUIlite.csproj
+          dotnet publish PatchGUIlite/PatchGUIlite.csproj
           -c Release
           -r win-x64
           --self-contained true
@@ -32,7 +32,7 @@ jobs:
 
       - name: Publish (Framework-dependent)
         run: >
-          dotnet publish PatchGUI/PatchGUIlite.csproj
+          dotnet publish PatchGUIlite/PatchGUIlite.csproj
           -c Release
           -r win-x64
           --self-contained false
