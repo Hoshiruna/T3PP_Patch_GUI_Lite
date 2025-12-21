@@ -39,4 +39,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            PatchGUIlite-${{ github.ref_name }}-win-x64.zip
+            PatchGUIlite-${{ github.ref_name }}-win-x64-framework.zip
