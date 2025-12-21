@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
 using PatchGUIlite;
+using WpfMessageBox = System.Windows.MessageBox;
 
 namespace PatchGUIlite.Core
 {
@@ -22,7 +23,7 @@ namespace PatchGUIlite.Core
 
             string message = L("runtime.missing.message", "Required .NET 8.0 Windows Desktop Runtime is missing.\nThe download page will now open. Install it, then restart the app.");
             string title = L("runtime.missing.title", "Missing Runtime");
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
             TryOpenDownloadPage();
             return false;
         }

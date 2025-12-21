@@ -1056,10 +1056,11 @@ namespace PatchGUIlite
                 if (!UpdateService.StartUpdateApply(sourceDir, targetDir, exePath, Process.GetCurrentProcess().Id, out string? error))
                 {
                     SetUpdateStatus("update.status.applyFailed", "Failed to start updater.");
+                    string errDisplay = string.IsNullOrWhiteSpace(error) ? "Unknown error" : error;
                     ShowUpdate("dialog.update.updaterFailed", "Failed to start the updater: {0}",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error,
-                        error);
+                        errDisplay);
                     return;
                 }
 
