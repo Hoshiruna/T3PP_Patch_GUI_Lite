@@ -11,7 +11,8 @@ T3PP_PatchGUIlite is a Windows WPF frontend for Touhou 3rd-party Patch (`.t3pp`)
 - Language toggle (Simplified Chinese by default, English included).
 
 ## Requirements
-- Windows with .NET 8 SDK (desktop workload).
+- Windows with .NET 8 SDK (desktop workload) for building.
+- Windows with .NET 8.0 Windows Desktop Runtime installed to run.
 - Visual Studio 2022 (optional) or the `dotnet` CLI.
 - Native helpers: `T3ppNativeLite.dll` is copied automatically; xdelta3 is embedded as a resource.
 

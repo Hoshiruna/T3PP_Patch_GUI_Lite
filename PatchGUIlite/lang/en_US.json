@@ -127,5 +127,8 @@
   "log.gen.detail.modeFileList": "Mode: File-list mode (handled as directory for now)",
   "log.gen.detail.modeFile": "Mode: File diff",
   "log.gen.completed": "Diff generation completed.",
-  "log.gen.failed": "Diff generation failed: {0}"
+  "log.gen.failed": "Diff generation failed: {0}",
+
+  "runtime.missing.title": "Missing Runtime",
+  "runtime.missing.message": "Required .NET 8.0 Windows Desktop Runtime is missing.\nThe download page will now open. Install it, then restart the app."
 }

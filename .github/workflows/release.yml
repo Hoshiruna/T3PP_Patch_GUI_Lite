@@ -21,7 +21,6 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      # 1) framework-dependent
       - name: Publish (framework-dependent)
         run: >
           dotnet publish PatchGUIlite/PatchGUIlite.csproj
@@ -30,27 +29,14 @@ jobs:
           --self-contained false
           -o artifacts/framework-win-x64
 
-      # 2) self-contained
-      - name: Publish (self-contained)
-        run: >
-          dotnet publish PatchGUIlite/PatchGUIlite.csproj
-          -c Release
-          -r win-x64
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -o artifacts/selfcontained-win-x64
-
       - name: Zip artifacts
         shell: pwsh
         run: |
           Compress-Archive -Path "artifacts/framework-win-x64/*" -DestinationPath "PatchGUIlite-${{ github.ref_name }}-win-x64-framework.zip" -Force
-          Compress-Archive -Path "artifacts/selfcontained-win-x64/*" -DestinationPath "PatchGUIlite-${{ github.ref_name }}-win-x64-selfcontained.zip" -Force
 
       - name: Create GitHub Release + upload assets
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            PatchGUIlite-${{ github.ref_name }}-win-x64-framework.zip
-            PatchGUIlite-${{ github.ref_name }}-win-x64-selfcontained.zip
+            PatchGUIlite-${{ github.ref_name }}-win-x64.zip
