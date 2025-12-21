@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
-    <Version>0.0.1</Version>
+    <Version>0.0.1-hotfix</Version>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.0.1.0</FileVersion>
+    <FileVersion>0.0.1.0-hotfix</FileVersion>
     <InformationalVersion>0.0.1</InformationalVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,13 +17,19 @@
   <ItemGroup>
     <None Remove="Highlighting\Json.xshd" />
     <None Remove="res\xdelta3.exe" />
-    <None Remove="T3ppNativeLite.dll" />
+    <None Remove="T3ppNativelite_Debug_x64.dll" />
+    <None Remove="T3ppNativelite_Release_x64.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="T3ppNativeLite.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Content Include="T3ppNativelite_Debug_x64.dll" Condition="'$(Configuration)'=='Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="T3ppNativelite_Release_x64.dll" Condition="'$(Configuration)'!='Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -9,14 +9,18 @@ namespace PatchGUIlite.Core
         // P/Invoke 声明
         // ---------------------
 
-        // 和 C++ t3pp_native.h 定义保持一致
+        // C++ t3pp_native.h bindings
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         private delegate void NativeLogCb(int level, string msg);
 
         private static class Native
         {
-            // TODO: 如果你的 DLL 名不是 T3ppNativeLite.dll，在这里改
-            private const string DllName = "T3ppNativeLite.dll";
+            // Use config-specific native binary so debug/release can coexist.
+#if DEBUG
+            private const string DllName = "T3ppNativelite_Debug_x64.dll";
+#else
+            private const string DllName = "T3ppNativelite_Release_x64.dll";
+#endif
 
             [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
             internal static extern int t3pp_apply_patch_from_file(

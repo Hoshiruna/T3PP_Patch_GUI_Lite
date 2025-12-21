@@ -104,8 +104,8 @@ namespace PatchGUIlite
             ApplyLocalization();
 
             string info = dirMode
-                ? "Switched to directory mode. Please reselect the directory."
-                : "Switched to file mode. Please reselect the file.";
+                ? LF("log.mode.switchedDirectory", "Switched to directory mode. Please reselect the directory.")
+                : LF("log.mode.switchedFile", "Switched to file mode. Please reselect the file.");
             AppendConsoleLine($"[INFO] {info}");
         }
 
@@ -119,8 +119,8 @@ namespace PatchGUIlite
 
             using var dialog = new WinForms.OpenFileDialog
             {
-                Title = "Select T3PP patch file",
-                Filter = "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*"
+                Title = L("dialog.title.selectPatchFile", "Select T3PP patch file"),
+                Filter = L("dialog.filter.patch", "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*")
             };
 
             if (dialog.ShowDialog() != WinForms.DialogResult.OK)
@@ -142,7 +142,7 @@ namespace PatchGUIlite
                 {
                     using var dialog = new WinForms.FolderBrowserDialog
                     {
-                        Description = "Select target directory"
+                        Description = L("dialog.title.selectTargetDirectory", "Select target directory")
                     };
 
                     if (!string.IsNullOrWhiteSpace(DirectoryTextBox.Text) &&
@@ -154,15 +154,15 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         DirectoryTextBox.Text = dialog.SelectedPath;
-                        AppendConsoleLine($"[INFO] Selected directory: {dialog.SelectedPath}");
+                        AppendConsoleLine($"[INFO] {LF("log.selection.directory", "Selected directory: {0}", dialog.SelectedPath)}");
                     }
                 }
                 else
                 {
                     using var dialog = new WinForms.OpenFileDialog
                     {
-                        Title = "Select target file",
-                        Filter = "All files (*.*)|*.*"
+                        Title = L("dialog.title.selectTargetFile", "Select target file"),
+                        Filter = L("dialog.filter.allFiles", "All files (*.*)|*.*")
                     };
 
                     if (!string.IsNullOrWhiteSpace(DirectoryTextBox.Text) &&
@@ -175,15 +175,14 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         DirectoryTextBox.Text = dialog.FileName;
-                        AppendConsoleLine($"[INFO] Selected file: {dialog.FileName}");
+                        AppendConsoleLine($"[INFO] {LF("log.selection.file", "Selected file: {0}", dialog.FileName)}");
                         UpdateHashDisplay(dialog.FileName);
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
             }
         }
 
@@ -191,8 +190,8 @@ namespace PatchGUIlite
         {
             using var dialog = new WinForms.OpenFileDialog
             {
-                Title = "Select T3PP patch file",
-                Filter = "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*"
+                Title = L("dialog.title.selectPatchFile", "Select T3PP patch file"),
+                Filter = L("dialog.filter.patch", "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*")
             };
 
             if (!string.IsNullOrWhiteSpace(_selectedPatchPath) && File.Exists(_selectedPatchPath))
@@ -206,7 +205,7 @@ namespace PatchGUIlite
                 _selectedPatchPath = dialog.FileName;
                 PatchFileTextBox.Text = _selectedPatchPath;
                 SelectDirButton.IsEnabled = true;
-                AppendConsoleLine($"[INFO] Selected patch: {_selectedPatchPath}");
+                AppendConsoleLine($"[INFO] {LF("log.selection.patch", "Selected patch: {0}", _selectedPatchPath)}");
                 ApplyPatchModeFromFile(_selectedPatchPath);
                 // Re-validate hashes if in file mode
                 if (!_useDirectoryMode && File.Exists(DirectoryTextBox.Text))
@@ -221,8 +220,7 @@ namespace PatchGUIlite
         {
             if (_patchCts != null)
             {
-                System.Windows.MessageBox.Show(this, "Patch is already running.", "Info",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowInfo("dialog.info.patchRunning", "Patch is already running.");
                 return;
             }
 
@@ -231,8 +229,7 @@ namespace PatchGUIlite
             {
                 if (string.IsNullOrEmpty(targetPath) || !Directory.Exists(targetPath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select a valid game directory.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectGameDirectory", "Please select a valid game directory.");
                     return;
                 }
             }
@@ -240,8 +237,7 @@ namespace PatchGUIlite
             {
                 if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select a valid target file.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectTargetFile", "Please select a valid target file.");
                     return;
                 }
             }
@@ -251,14 +247,12 @@ namespace PatchGUIlite
                 : (Path.GetDirectoryName(targetPath) ?? targetPath);
             if (string.IsNullOrWhiteSpace(gameRoot) || !Directory.Exists(gameRoot))
             {
-                System.Windows.MessageBox.Show(this, "Cannot resolve the directory of the selected file.", "Info",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowInfo("dialog.info.resolveDirectoryFailed", "Cannot resolve the directory of the selected file.");
                 return;
             }
             if (!_useDirectoryMode && string.IsNullOrWhiteSpace(_crc32))
             {
-                System.Windows.MessageBox.Show(this, "Failed to compute hash info. Please reselect the target file.", "Info",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowInfo("dialog.info.hashUnavailable", "Failed to compute hash info. Please reselect the target file.");
                 return;
             }
             if (!_useDirectoryMode && PatchFileTextBox.Text is string p && !string.IsNullOrWhiteSpace(p))
@@ -272,21 +266,20 @@ namespace PatchGUIlite
             string? patchPath = await ResolvePatchFilePathAsync();
             if (string.IsNullOrWhiteSpace(patchPath))
             {
-                AppendConsoleLine("[INFO] User canceled patch selection.");
+                AppendConsoleLine($"[INFO] {L("log.selection.cancelPatch", "User canceled patch selection.")}");
                 return;
             }
             ApplyPatchModeFromFile(patchPath);
             if (!_useDirectoryMode && !VerifyHashes(targetPath))
             {
-                System.Windows.MessageBox.Show(this, "Hash mismatch or calculation failed. Please verify the file.", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("dialog.error.hashMismatch", "Hash mismatch or calculation failed. Please verify the file.");
                 return;
             }
 
             AppendConsoleLine(_useDirectoryMode
-                ? $"[INFO] Target directory: {gameRoot}"
-                : $"[INFO] Target file: {targetPath} (will use its directory for patching)");
-            AppendConsoleLine($"[INFO] Selected patch: {patchPath}");
+                ? $"[INFO] {LF("log.patch.targetDirectory", "Target directory: {0}", gameRoot)}"
+                : $"[INFO] {LF("log.patch.targetFile", "Target file: {0} (will use its directory for patching)", targetPath)}");
+            AppendConsoleLine($"[INFO] {LF("log.selection.patch", "Selected patch: {0}", patchPath)}");
 
             _patchCts = new CancellationTokenSource();
 
@@ -306,14 +299,13 @@ namespace PatchGUIlite
                         dryRun: false);
                 });
 
-                AppendConsoleLine("[INFO] Patch applied successfully.");
+                AppendConsoleLine($"[INFO] {L("log.patch.applySuccess", "Patch applied successfully.")}");
 
             }
             catch (Exception ex)
             {
-                AppendConsoleLine($"[ERROR] Patch apply failed: {ex}");
-                System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                AppendConsoleLine($"[ERROR] {LF("log.patch.applyFailed", "Patch apply failed: {0}", ex)}");
+                ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
             }
             finally
             {
@@ -338,7 +330,7 @@ namespace PatchGUIlite
                 {
                     using var dialog = new WinForms.FolderBrowserDialog
                     {
-                        Description = "Select source directory (before changes)"
+                        Description = L("dialog.description.selectSourceDirectory", "Select source directory (before changes)")
                     };
 
                     if (!string.IsNullOrWhiteSpace(GenSourceBox.Text) &&
@@ -350,15 +342,15 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         GenSourceBox.Text = dialog.SelectedPath;
-                        AppendGenConsoleLine($"[INFO] Source path: {dialog.SelectedPath}");
+                        AppendGenConsoleLine($"[INFO] {LF("log.gen.sourcePath", "Source path: {0}", dialog.SelectedPath)}");
                     }
                 }
                 else
                 {
                     using var dialog = new WinForms.OpenFileDialog
                     {
-                        Title = "Select target file",
-                        Filter = "All files (*.*)|*.*"
+                        Title = L("dialog.title.selectSourceFile", "Select source file"),
+                        Filter = L("dialog.filter.allFiles", "All files (*.*)|*.*")
                     };
 
                     if (!string.IsNullOrWhiteSpace(GenSourceBox.Text) &&
@@ -371,14 +363,13 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         GenSourceBox.Text = dialog.FileName;
-                        AppendGenConsoleLine($"[INFO] Source path: {dialog.FileName}");
+                        AppendGenConsoleLine($"[INFO] {LF("log.gen.sourceFile", "Source file: {0}", dialog.FileName)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
             }
         }
 
@@ -390,7 +381,7 @@ namespace PatchGUIlite
                 {
                     using var dialog = new WinForms.FolderBrowserDialog
                     {
-                        Description = "Select target directory (after changes)"
+                        Description = L("dialog.description.selectTargetDirectory", "Select target directory (after changes)")
                     };
 
                     if (!string.IsNullOrWhiteSpace(GenTargetBox.Text) &&
@@ -402,15 +393,15 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         GenTargetBox.Text = dialog.SelectedPath;
-                        AppendGenConsoleLine($"[INFO] Target path: {dialog.SelectedPath}");
+                        AppendGenConsoleLine($"[INFO] {LF("log.gen.targetPath", "Target path: {0}", dialog.SelectedPath)}");
                     }
                 }
                 else
                 {
                     using var dialog = new WinForms.OpenFileDialog
                     {
-                        Title = "Select target file",
-                        Filter = "All files (*.*)|*.*"
+                        Title = L("dialog.title.selectTargetFile", "Select target file"),
+                        Filter = L("dialog.filter.allFiles", "All files (*.*)|*.*")
                     };
 
                     if (!string.IsNullOrWhiteSpace(GenTargetBox.Text) &&
@@ -423,14 +414,13 @@ namespace PatchGUIlite
                     if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                     {
                         GenTargetBox.Text = dialog.FileName;
-                        AppendGenConsoleLine($"[INFO] Target path: {dialog.FileName}");
+                        AppendGenConsoleLine($"[INFO] {LF("log.gen.targetFile", "Target file: {0}", dialog.FileName)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
             }
         }
 
@@ -443,15 +433,13 @@ namespace PatchGUIlite
             {
                 if (string.IsNullOrEmpty(sourcePath) || !Directory.Exists(sourcePath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select the source directory first.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectSourceDirectory", "Please select the source directory first.");
                     return;
                 }
 
                 if (string.IsNullOrEmpty(targetPath) || !Directory.Exists(targetPath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select the target directory first.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectTargetDirectory", "Please select the target directory first.");
                     return;
                 }
 
@@ -462,8 +450,8 @@ namespace PatchGUIlite
                 string outFile;
                 using (var dialog = new WinForms.SaveFileDialog
                 {
-                    Title = "Select patch output file",
-                    Filter = "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*",
+                    Title = L("dialog.title.selectPatchOutput", "Select patch output file"),
+                    Filter = L("dialog.filter.patch", "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*"),
                     FileName = defaultName,
                     InitialDirectory = baseDir
                 })
@@ -476,41 +464,41 @@ namespace PatchGUIlite
                     outFile = dialog.FileName;
                 }
 
-                AppendGenConsoleLine($"[INFO] Source path: {sourcePath}");
-                AppendGenConsoleLine($"[INFO] Target path: {targetPath}");
-                AppendGenConsoleLine("[INFO] Start generating diff patch:");
-                AppendGenConsoleLine($"       Source: {sourcePath}");
-                AppendGenConsoleLine($"       Target: {targetPath}");
-                AppendGenConsoleLine($"       Output: {outFile}");
-                AppendGenConsoleLine($"       Mode: {(packDirectory ? "Directory diff" : "File-list mode (handled as directory for now)")}");
+                AppendGenConsoleLine($"[INFO] {LF("log.gen.sourcePath", "Source path: {0}", sourcePath)}");
+                AppendGenConsoleLine($"[INFO] {LF("log.gen.targetPath", "Target path: {0}", targetPath)}");
+                AppendGenConsoleLine($"[INFO] {L("log.gen.start", "Start generating diff patch:")}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.source", "Source: {0}", sourcePath)}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.target", "Target: {0}", targetPath)}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.output", "Output: {0}", outFile)}");
+                string modeLine = packDirectory
+                    ? LF("log.gen.detail.modeDirectory", "Mode: Directory diff")
+                    : LF("log.gen.detail.modeFileList", "Mode: File-list mode (handled as directory for now)");
+                AppendGenConsoleLine($"       {modeLine}");
 
                 try
                 {
                     await Task.Run(() => T3ppDiff.CreateDirectoryDiff(sourcePath, targetPath, outFile));
                     var modeTag = packDirectory ? DirectoryPatchTag : FilePatchTag;
                     File.AppendAllText(outFile, $"{modeTag}");
-                    AppendGenConsoleLine("[INFO] Diff generation completed.");
+                    AppendGenConsoleLine($"[INFO] {L("log.gen.completed", "Diff generation completed.")}");
                 }
                 catch (Exception ex)
                 {
-                    AppendGenConsoleLine($"[ERROR] Diff generation failed: {ex}");
-                    System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppendGenConsoleLine($"[ERROR] {LF("log.gen.failed", "Diff generation failed: {0}", ex)}");
+                    ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
                 }
             }
             else
             {
                 if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select the source file first.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectSourceFile", "Please select the source file first.");
                     return;
                 }
 
                 if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
                 {
-                    System.Windows.MessageBox.Show(this, "Please select the target file first.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowInfo("dialog.info.selectTargetFileFirst", "Please select the target file first.");
                     return;
                 }
 
@@ -522,8 +510,8 @@ namespace PatchGUIlite
                 string outFile;
                 using (var dialog = new WinForms.SaveFileDialog
                 {
-                    Title = "Select patch output file",
-                    Filter = "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*",
+                    Title = L("dialog.title.selectPatchOutput", "Select patch output file"),
+                    Filter = L("dialog.filter.patch", "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*"),
                     FileName = defaultName,
                     InitialDirectory = baseDir
                 })
@@ -536,13 +524,14 @@ namespace PatchGUIlite
                     outFile = dialog.FileName;
                 }
 
-                AppendGenConsoleLine($"[INFO] Source file: {sourcePath}");
-                AppendGenConsoleLine($"[INFO] Target file: {targetPath}");
-                AppendGenConsoleLine("[INFO] Start generating diff patch:");
-                AppendGenConsoleLine($"       Source: {sourcePath}");
-                AppendGenConsoleLine($"       Target: {targetPath}");
-                AppendGenConsoleLine($"       Output: {outFile}");
-                AppendGenConsoleLine("       Mode: File diff");
+                AppendGenConsoleLine($"[INFO] {LF("log.gen.sourceFile", "Source file: {0}", sourcePath)}");
+                AppendGenConsoleLine($"[INFO] {LF("log.gen.targetFile", "Target file: {0}", targetPath)}");
+                AppendGenConsoleLine($"[INFO] {L("log.gen.start", "Start generating diff patch:")}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.source", "Source: {0}", sourcePath)}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.target", "Target: {0}", targetPath)}");
+                AppendGenConsoleLine($"       {LF("log.gen.detail.output", "Output: {0}", outFile)}");
+                string modeLine = LF("log.gen.detail.modeFile", "Mode: File diff");
+                AppendGenConsoleLine($"       {modeLine}");
 
                 string tempOldDir = Path.Combine(Path.GetTempPath(), "t3pp_old_" + Guid.NewGuid().ToString("N"));
                 string tempNewDir = Path.Combine(Path.GetTempPath(), "t3pp_new_" + Guid.NewGuid().ToString("N"));
@@ -569,13 +558,12 @@ namespace PatchGUIlite
                 {
                     await Task.Run(() => T3ppDiff.CreateDirectoryDiff(tempOldDir, tempNewDir, outFile));
                     File.AppendAllText(outFile, $"{FilePatchTag}");
-                    AppendGenConsoleLine("[INFO] Diff generation completed.");
+                    AppendGenConsoleLine($"[INFO] {L("log.gen.completed", "Diff generation completed.")}");
                 }
                 catch (Exception ex)
                 {
-                    AppendGenConsoleLine($"[ERROR] Diff generation failed: {ex}");
-                    System.Windows.MessageBox.Show(this, $"Failed to select path: {ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppendGenConsoleLine($"[ERROR] {LF("log.gen.failed", "Diff generation failed: {0}", ex)}");
+                    ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
                 }
                 finally
                 {
@@ -593,6 +581,28 @@ namespace PatchGUIlite
 
 
         private string L(string key, string fallback) => LocalizationManager.Get(key, fallback);
+
+        private string LF(string key, string fallback, params object[] args)
+        {
+            string format = L(key, fallback);
+            return args.Length > 0 ? string.Format(format, args) : format;
+        }
+
+        private MessageBoxResult ShowMessage(string messageKey, string messageFallback, string titleKey, string titleFallback, MessageBoxButton buttons, MessageBoxImage image, params object[] args)
+        {
+            string message = LF(messageKey, messageFallback, args);
+            string title = L(titleKey, titleFallback);
+            return System.Windows.MessageBox.Show(this, message, title, buttons, image);
+        }
+
+        private MessageBoxResult ShowInfo(string key, string fallback, params object[] args) =>
+            ShowMessage(key, fallback, "dialog.title.info", "Info", MessageBoxButton.OK, MessageBoxImage.Information, args);
+
+        private MessageBoxResult ShowError(string key, string fallback, params object[] args) =>
+            ShowMessage(key, fallback, "dialog.title.error", "Error", MessageBoxButton.OK, MessageBoxImage.Error, args);
+
+        private MessageBoxResult ShowUpdate(string key, string fallback, MessageBoxButton buttons, MessageBoxImage image, params object[] args) =>
+            ShowMessage(key, fallback, "dialog.title.update", "Update", buttons, image, args);
 
         private void AppendConsoleLine(string line)
         {
@@ -636,17 +646,22 @@ namespace PatchGUIlite
             if (metadata == null)
                 return;
 
-            string securityMessage = metadata.IsSecurityPatch
+            string securityKey = metadata.IsSecurityPatch
+                ? "dialog.info.verifiedPatch"
+                : "dialog.info.unverifiedPatch";
+            string securityFallback = metadata.IsSecurityPatch
                 ? "This is a verified patch."
                 : "This is an unverified patch; exercise caution when applying.";
-            System.Windows.MessageBox.Show(this, securityMessage, "Info",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            ShowInfo(securityKey, securityFallback);
 
             if (metadata.Mode == null)
                 return;
 
             bool dirMode = metadata.Mode == PatchModeHint.Directory;
-            string message = dirMode
+            string messageKey = dirMode
+                ? "dialog.info.detectedDirectoryPatch"
+                : "dialog.info.detectedFilePatch";
+            string messageFallback = dirMode
                 ? "Current patch detected as directory patch. Switched to directory mode."
                 : "Current patch detected as file patch. Switched to file mode.";
 
@@ -656,8 +671,7 @@ namespace PatchGUIlite
             UpdateHashDisplay(null);
             ApplyLocalization();
 
-            System.Windows.MessageBox.Show(this, message, "Info",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            ShowInfo(messageKey, messageFallback);
         }
 
         private void UpdateHashDisplay(string? path)
@@ -681,8 +695,7 @@ namespace PatchGUIlite
             {
                 _crc32 = _md5 = _sha1 = null;
                 SetHashTexts("N/A", "N/A", "N/A");
-                System.Windows.MessageBox.Show(this, "Failed to compute hashes. Please try again.", "Info",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowInfo("dialog.error.hashCompute", "Failed to compute hashes. Please try again.");
                 return;
             }
 
@@ -726,7 +739,7 @@ namespace PatchGUIlite
 
             if (!match)
             {
-                AppendConsoleLine("[ERROR] Hash values differ from previous calculation. Please verify the file.");
+                AppendConsoleLine($"[ERROR] {L("log.hash.mismatch", "Hash values differ from previous calculation. Please verify the file.")}");
             }
 
             return match;
@@ -943,9 +956,7 @@ namespace PatchGUIlite
                 if (string.IsNullOrWhiteSpace(remoteVersion))
                 {
                     SetUpdateStatus("update.status.checkFailed", "Failed to check the remote version.");
-                    System.Windows.MessageBox.Show(this,
-                        "Failed to read the remote version file from GitHub.",
-                        "Update",
+                    ShowUpdate("dialog.update.remoteVersionMissing", "Failed to read the remote version file from GitHub.",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                     return;
@@ -955,9 +966,7 @@ namespace PatchGUIlite
                 if (!UpdateService.IsRemoteVersionNewer(remoteVersion, localVersion))
                 {
                     SetUpdateStatus("update.status.uptodate", "Already up to date.");
-                    System.Windows.MessageBox.Show(this,
-                        "Already up to date.",
-                        "Update",
+                    ShowUpdate("dialog.update.alreadyLatest", "Already up to date.",
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                     return;
@@ -970,18 +979,14 @@ namespace PatchGUIlite
                     if (failure == UpdatePackageFailure.ReleaseMissing)
                     {
                         SetUpdateStatus("update.status.releaseMissing", "Release information not available.");
-                        System.Windows.MessageBox.Show(this,
-                            "Failed to load release information from GitHub.",
-                            "Update",
+                        ShowUpdate("dialog.update.releaseMissing", "Failed to load release information from GitHub.",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
                         return;
                     }
 
                     SetUpdateStatus("update.status.assetMissing", "Release package not found.");
-                    System.Windows.MessageBox.Show(this,
-                        "No .zip release package was found. Publish a release asset first.",
-                        "Update",
+                    ShowUpdate("dialog.update.assetMissing", "No .zip release package was found. Publish a release asset first.",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                     return;
@@ -996,9 +1001,7 @@ namespace PatchGUIlite
                 if (!await UpdateService.DownloadFileAsync(package.DownloadUrl, zipPath))
                 {
                     SetUpdateStatus("update.status.downloadFailed", "Download failed.");
-                    System.Windows.MessageBox.Show(this,
-                        "Failed to download the release package.",
-                        "Update",
+                    ShowUpdate("dialog.update.downloadFailed", "Failed to download the release package.",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                     return;
@@ -1014,11 +1017,10 @@ namespace PatchGUIlite
                 catch (Exception ex)
                 {
                     SetUpdateStatus("update.status.extractFailed", "Invalid update package.");
-                    System.Windows.MessageBox.Show(this,
-                        $"Failed to extract the update package: {ex.Message}",
-                        "Update",
+                    ShowUpdate("dialog.update.extractFailed", "Failed to extract the update package: {0}",
                         MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        MessageBoxImage.Error,
+                        ex.Message);
                     return;
                 }
 
@@ -1026,9 +1028,7 @@ namespace PatchGUIlite
                 if (string.IsNullOrWhiteSpace(sourceDir) || !Directory.Exists(sourceDir))
                 {
                     SetUpdateStatus("update.status.extractFailed", "Invalid update package.");
-                    System.Windows.MessageBox.Show(this,
-                        "The update package does not contain PatchGUIlite.exe.",
-                        "Update",
+                    ShowUpdate("dialog.update.invalidPackage", "The update package does not contain PatchGUIlite.exe.",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                     return;
@@ -1039,11 +1039,14 @@ namespace PatchGUIlite
                                  ?? Path.Combine(targetDir, "PatchGUIlite.exe");
 
                 SetUpdateStatus("update.status.readyToInstall", "Update ready to install.");
-                var result = System.Windows.MessageBox.Show(this,
-                    $"Update downloaded.{Environment.NewLine}Local: {localDisplay}{Environment.NewLine}Remote: {remoteVersion}{Environment.NewLine}{Environment.NewLine}The app will close to install the update. Continue?",
-                    "Update",
+                var result = ShowUpdate(
+                    "dialog.update.confirmApply",
+                    "Update downloaded.{0}Local: {1}{0}Remote: {2}{0}{0}The app will close to install the update. Continue?",
                     MessageBoxButton.OKCancel,
-                    MessageBoxImage.Information);
+                    MessageBoxImage.Information,
+                    Environment.NewLine,
+                    localDisplay,
+                    remoteVersion);
                 if (result != MessageBoxResult.OK)
                 {
                     SetUpdateStatus("update.status.readyToInstall", "Update ready to install.");
@@ -1053,11 +1056,10 @@ namespace PatchGUIlite
                 if (!UpdateService.StartUpdateApply(sourceDir, targetDir, exePath, Process.GetCurrentProcess().Id, out string? error))
                 {
                     SetUpdateStatus("update.status.applyFailed", "Failed to start updater.");
-                    System.Windows.MessageBox.Show(this,
-                        $"Failed to start the updater: {error}",
-                        "Update",
+                    ShowUpdate("dialog.update.updaterFailed", "Failed to start the updater: {0}",
                         MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        MessageBoxImage.Error,
+                        error);
                     return;
                 }
 
@@ -1068,11 +1070,10 @@ namespace PatchGUIlite
             catch (Exception ex)
             {
                 SetUpdateStatus("update.status.failed", "Update failed.");
-                System.Windows.MessageBox.Show(this,
-                    $"Update failed: {ex.Message}",
-                    "Update",
+                ShowUpdate("dialog.update.failed", "Update failed: {0}",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    MessageBoxImage.Error,
+                    ex.Message);
             }
             finally
             {

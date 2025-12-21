@@ -10,7 +10,14 @@ namespace PatchGUIlite.Core
             int level,
             [MarshalAs(UnmanagedType.LPWStr)] string msg);
 
-        [DllImport("T3ppNativeLite.dll",
+        private const string NativeDll =
+#if DEBUG
+            "T3ppNativelite_Debug_x64.dll";
+#else
+            "T3ppNativelite_Release_x64.dll";
+#endif
+
+        [DllImport(NativeDll,
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Unicode)]
         public static extern int t3pp_rules_encrypt(
@@ -18,7 +25,7 @@ namespace PatchGUIlite.Core
             out IntPtr outBuf,
             out int outLen);
 
-        [DllImport("T3ppNativeLite.dll",
+        [DllImport(NativeDll,
             CallingConvention = CallingConvention.StdCall)]
         public static extern int t3pp_rules_decrypt(
             byte[] data,
@@ -26,11 +33,11 @@ namespace PatchGUIlite.Core
             out IntPtr outJson,
             out int outJsonLen);
 
-        [DllImport("T3ppNativeLite.dll",
+        [DllImport(NativeDll,
             CallingConvention = CallingConvention.StdCall)]
         public static extern void t3pp_rules_free(IntPtr p);
 
-        [DllImport("T3ppNativeLite.dll",
+        [DllImport(NativeDll,
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Unicode)]
         public static extern int t3pp_apply_patch_from_file(
