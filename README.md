@@ -4,7 +4,10 @@
 
 ![logo](PatchGUIlite/res/t3pp.png)
 
+## About
 T3PP_PatchGUIlite is a Windows WPF frontend for Touhou 3rd-party Patch (`.t3pp`) packages. It lets you apply patches to game installs or generate new patch files with a simple UI backed by the native T3pp toolkit and xdelta3.
+
+Get the full version: [Here](https://github.com/CNTianQi233/T3PP-PatchGUI-Public)
 
 ## Features
 - Apply `.t3pp` patches to a directory or single file, with hash readout (CRC32/MD5/SHA1) for the target.
@@ -31,7 +34,7 @@ dotnet build PatchGUI/PatchGUIlite.csproj -c Release
 
 Keep these files next to the executable:
 - `PatchGUIlite.dll`, `PatchGUIlite.deps.json`, `PatchGUIlite.runtimeconfig.json`
-- `T3ppNativeLite.dll`
+- `T3ppNativelite.dll`
 - `lang/` folder (`zh_CN.json`, `en_US.json`)
 
 ## Updates (Release ZIP)

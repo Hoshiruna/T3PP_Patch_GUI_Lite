@@ -588,11 +588,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <ui:Button Grid.Column="0"
-                                   x:Name="GameSelectButton"
+                                   x:Name="ModeSelectButton"
                                    Appearance="Secondary"
                                    Style="{StaticResource AnimatedButtonStyle}"
                                    Padding="12,8"
-                                   Click="GameSelectButton_Click"
+                                   Click="ModeSelectButton_Click"
                                    Content="模式选择">
                             <ui:Button.ContextMenu>
                                 <ContextMenu>
@@ -606,7 +606,7 @@
                             </ui:Button.ContextMenu>
                         </ui:Button>
                         <TextBlock Grid.Column="2"
-                                   x:Name="SelectedGameText"
+                                   x:Name="SelectedModeText"
                                    Text="当前模式：目录模式"
                                    FontSize="18"
                                    FontWeight="SemiBold"

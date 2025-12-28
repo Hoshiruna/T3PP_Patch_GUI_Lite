@@ -1,16 +1,14 @@
-﻿{
+{
   "window.title": "T3PP补丁器轻量版",
   "nav.patch": "应用补丁",
   "nav.generate": "生成补丁",
   "nav.rule": "规则",
   "nav.settings": "设置",
-
-  "button.gameSelect": "选择模式",
+  "button.modeSelect": "选择模式",
   "label.currentModeDirectory": "当前模式：目录模式",
   "label.currentModeFile": "当前模式：文件模式",
   "menu.mode.directory": "目录模式",
   "menu.mode.file": "文件模式",
-
   "button.selectDir": "选择目标",
   "tooltip.selectDir": "浏览目标路径",
   "placeholder.gameDir": "选择目标目录...",
@@ -18,10 +16,8 @@
   "button.selectPatch": "选择补丁",
   "tooltip.selectPatch": "选择 .t3pp 补丁文件",
   "placeholder.patchFile": "选择补丁文件...",
-
   "button.runPatch": "应用补丁",
   "label.hashInfo": "校验信息",
-
   "gen.button.source": "选择文件夹",
   "gen.tooltip.source": "选择修改前的文件夹",
   "gen.placeholder.source": "选择原始文件夹...",
@@ -37,8 +33,6 @@
   "gen.packDirectory": "打包目录",
   "gen.packDirectory.tooltip": "开启：按目录生成差分；关闭：按文件列表模式生成。",
   "gen.button.start": "生成补丁",
-
-
   "settings.title": "设置",
   "settings.languageSection": "语言",
   "settings.languageLabel": "界面语言",
@@ -62,11 +56,9 @@
   "update.status.downloadFailed": "下载失败。",
   "update.status.extractFailed": "更新包无效。",
   "update.status.applyFailed": "无法启动更新程序。",
-
   "dialog.title.info": "提示",
   "dialog.title.error": "错误",
   "dialog.title.update": "更新",
-
   "dialog.title.selectPatchFile": "选择 T3PP 补丁文件",
   "dialog.title.selectTargetDirectory": "选择目标目录",
   "dialog.title.selectTargetFile": "选择目标文件",
@@ -76,7 +68,6 @@
   "dialog.description.selectTargetDirectory": "选择目标目录（修改后）",
   "dialog.filter.patch": "T3PP补丁 (*.t3pp)|*.t3pp|所有文件 (*.*)|*.*",
   "dialog.filter.allFiles": "所有文件 (*.*)|*.*",
-
   "dialog.error.pathSelect": "选择路径失败：{0}",
   "dialog.info.patchRunning": "补丁正在运行。",
   "dialog.info.selectGameDirectory": "请选择有效的游戏目录。",
@@ -85,6 +76,14 @@
   "dialog.info.hashUnavailable": "无法计算哈希信息，请重新选择目标文件。",
   "dialog.error.hashMismatch": "哈希不一致或计算失败，请检查文件。",
   "dialog.error.hashCompute": "无法计算哈希值，请重试。",
+  "dialog.error.patchApply": "补丁应用失败。错误代码：{0}",
+  "dialog.hashMismatch.title": "警告",
+  "dialog.hashMismatch.prompt": "检测到文件不匹配：\n{0}{1}\n\n仍要继续应用补丁吗？",
+  "dialog.hashMismatch.ok": "确定",
+  "dialog.hashMismatch.cancel": "取消",
+  "dialog.hashMismatch.unknownPath": "未知路径",
+  "dialog.info.patchComplete": "补丁应用完成。",
+  "dialog.info.patchGenerateComplete": "补丁生成完成。",
   "dialog.info.selectSourceDirectory": "请先选择源目录。",
   "dialog.info.selectTargetDirectory": "请先选择目标目录。",
   "dialog.info.selectSourceFile": "请先选择源文件。",
@@ -93,7 +92,6 @@
   "dialog.info.unverifiedPatch": "这是未验证的补丁，应用时请谨慎。",
   "dialog.info.detectedDirectoryPatch": "检测到当前补丁为目录补丁，已切换到目录模式。",
   "dialog.info.detectedFilePatch": "检测到当前补丁为文件补丁，已切换到文件模式。",
-
   "dialog.update.remoteVersionMissing": "无法从 GitHub 读取远程版本文件。",
   "dialog.update.alreadyLatest": "已是最新版本。",
   "dialog.update.releaseMissing": "无法从 GitHub 加载发布信息。",
@@ -104,17 +102,18 @@
   "dialog.update.confirmApply": "更新已下载。{0}本地版本：{1}{0}远程版本：{2}{0}{0}应用将关闭以安装更新，是否继续？",
   "dialog.update.updaterFailed": "无法启动更新程序：{0}",
   "dialog.update.failed": "更新失败：{0}",
-
   "log.mode.switchedDirectory": "已切换到目录模式，请重新选择目录。",
   "log.mode.switchedFile": "已切换到文件模式，请重新选择文件。",
   "log.selection.directory": "已选择目录：{0}",
   "log.selection.file": "已选择文件：{0}",
   "log.selection.patch": "已选择补丁：{0}",
   "log.selection.cancelPatch": "用户取消了补丁选择。",
-  "log.patch.targetDirectory": "目标目录：{0}",
-  "log.patch.targetFile": "目标文件：{0}（将使用其所在目录进行补丁）",
-  "log.patch.applySuccess": "补丁应用完成。",
-  "log.patch.applyFailed": "补丁应用失败：{0}",
+  "log.patch.targetDirectory": "目标目录:{0}",
+  "log.patch.targetFile": "目标文件:{0}(将使用其所在目录进行补丁)",
+  "log.patch.applySuccess": "补丁应用成功。",
+  "log.patch.applyFailed": "补丁应用失败:{0}",
+  "log.patch.cancelledByUser": "用户在不匹配提示后取消了补丁。",
+  "log.patch.mismatchContinued": "补丁在不匹配的情况下应用完毕 {0}",
   "log.hash.mismatch": "哈希值与上次计算不一致，请检查文件。",
   "log.gen.sourcePath": "源路径：{0}",
   "log.gen.targetPath": "目标路径：{0}",
@@ -129,7 +128,6 @@
   "log.gen.detail.modeFile": "模式：文件差分",
   "log.gen.completed": "差分生成完成。",
   "log.gen.failed": "差分生成失败：{0}",
-
   "runtime.missing.title": "缺少运行时",
   "runtime.missing.message": "缺少必需的 .NET 8.0 Windows Desktop Runtime。\n现在将打开下载页面，请安装后重新启动应用。"
 }

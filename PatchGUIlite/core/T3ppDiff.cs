@@ -6,16 +6,14 @@ namespace PatchGUIlite.Core
     public static class T3ppDiff
     {
         // ---------------------
-        // P/Invoke 声明
+        // P/Invoke bindings
         // ---------------------
 
-        // C++ t3pp_native.h bindings
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         private delegate void NativeLogCb(int level, string msg);
 
         private static class Native
         {
-            // Use config-specific native binary so debug/release can coexist.
 #if DEBUG
             private const string DllName = "T3ppNativelite_Debug_x64.dll";
 #else
@@ -27,6 +25,7 @@ namespace PatchGUIlite.Core
                 string patch_file,
                 string target_root,
                 NativeLogCb? logger,
+                HashMismatchNativeCb? mismatchCb,
                 int dry_run);
 
             [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
@@ -37,25 +36,25 @@ namespace PatchGUIlite.Core
                 NativeLogCb? logger);
         }
 
-        // 这个仍然保留给 MainWindow 用
         public static Action<string>? DebugLog;
 
         // ---------------------
-        // 对外 API：应用补丁
+        // Apply patch
         // ---------------------
-        public static void ApplyPatchToDirectory(
+        public static int ApplyPatchToDirectory(
             string patchFile,
             string targetRoot,
             Action<string>? logger,
-            bool dryRun)
+            bool dryRun,
+            Action<string, string>? hashMismatchHandler = null)
         {
             if (string.IsNullOrWhiteSpace(patchFile))
                 throw new ArgumentNullException(nameof(patchFile));
             if (string.IsNullOrWhiteSpace(targetRoot))
                 throw new ArgumentNullException(nameof(targetRoot));
 
-            // 将 native log 映射回托管 logger / DebugLog
             NativeLogCb? cb = null;
+            HashMismatchNativeCb? mismatchCb = null;
 
             if (logger != null || DebugLog != null)
             {
@@ -74,25 +73,34 @@ namespace PatchGUIlite.Core
                     }
                     catch
                     {
-                        // 日志失败直接吞掉，避免 native 回调崩溃
+                        // Swallow logging errors to keep native call unaffected.
                     }
                 };
+            }
+
+            if (hashMismatchHandler != null)
+            {
+                HashUtility.SetHashMismatchHandler(hashMismatchHandler);
+                mismatchCb = HashUtility.GetNativeMismatchCallback();
             }
 
             int rc = Native.t3pp_apply_patch_from_file(
                 patchFile,
                 targetRoot,
                 cb,
+                mismatchCb,
                 dryRun ? 1 : 0);
 
-            if (rc != 0)
+            if (hashMismatchHandler != null)
             {
-                throw new InvalidOperationException($"原生补丁应用失败，错误码：{rc}");
+                HashUtility.SetHashMismatchHandler(null);
             }
+
+            return rc;
         }
 
         // ---------------------
-        // 对外 API：生成补丁
+        // Create diff
         // ---------------------
         public static void CreateDirectoryDiff(
             string oldDir,
@@ -127,17 +135,14 @@ namespace PatchGUIlite.Core
 
             if (rc == 1)
             {
-                // 1 = 没有差异（和你原来抛异常的语义相近）
-                throw new InvalidOperationException("两个目录完全一致，没有需要打包的差分文件。");
+                // 1 = no changes found
+                throw new InvalidOperationException("????????,????????????");
             }
 
             if (rc != 0)
             {
-                throw new InvalidOperationException($"原生补丁生成失败，错误码：{rc}");
+                throw new InvalidOperationException($"????????,???:{rc}");
             }
         }
     }
 }
-
-
-

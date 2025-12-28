@@ -32,7 +32,7 @@ jobs:
       - name: Remove PDBs from artifacts
         shell: pwsh
         run: |
-          Get-ChildItem -Path artifacts/framework-win-x64 -Recurse -Filter *.pdb | Remove-Item -Force
+          Get-ChildItem -Path artifacts/framework-win-x64 -Recurse -Filter *.pdb *.deps.json *.json | Remove-Item -Force
 
       - name: Zip artifacts
         shell: pwsh

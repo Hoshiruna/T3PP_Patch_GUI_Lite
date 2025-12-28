@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,13 +29,14 @@ namespace PatchGUIlite
         private string? _crc32;
         private string? _md5;
         private string? _sha1;
-        private static readonly uint[] Crc32Table = BuildCrc32Table();
         private TextBlock? _hashCrcText;
         private TextBlock? _hashMd5Text;
         private TextBlock? _hashSha1Text;
         private static readonly string ErrorLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log");
         private static readonly string RunLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "run.log");
         private CancellationTokenSource? _patchCts;
+        private bool _isPatching;
+        private bool _isGenerating;
         private bool _isUpdating;
         private string _updateStatusKey = "update.status.ready";
         private string _updateStatusFallback = "Ready";
@@ -71,11 +71,11 @@ namespace PatchGUIlite
 
         #region Mode selection
 
-        private void GameSelectButton_Click(object sender, RoutedEventArgs e)
+        private void ModeSelectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (GameSelectButton.ContextMenu is ContextMenu menu)
+            if (ModeSelectButton.ContextMenu is ContextMenu menu)
             {
-                menu.PlacementTarget = GameSelectButton;
+                menu.PlacementTarget = ModeSelectButton;
                 menu.Placement = PlacementMode.Bottom;
                 menu.IsOpen = true;
             }
@@ -218,88 +218,145 @@ namespace PatchGUIlite
         //
         private async void RunPatchButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_patchCts != null)
+            if (_isPatching || _patchCts != null)
             {
                 ShowInfo("dialog.info.patchRunning", "Patch is already running.");
                 return;
             }
 
-            string targetPath = DirectoryTextBox.Text.Trim();
-            if (_useDirectoryMode)
-            {
-                if (string.IsNullOrEmpty(targetPath) || !Directory.Exists(targetPath))
-                {
-                    ShowInfo("dialog.info.selectGameDirectory", "Please select a valid game directory.");
-                    return;
-                }
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
-                {
-                    ShowInfo("dialog.info.selectTargetFile", "Please select a valid target file.");
-                    return;
-                }
-            }
-
-            string gameRoot = _useDirectoryMode
-                ? targetPath
-                : (Path.GetDirectoryName(targetPath) ?? targetPath);
-            if (string.IsNullOrWhiteSpace(gameRoot) || !Directory.Exists(gameRoot))
-            {
-                ShowInfo("dialog.info.resolveDirectoryFailed", "Cannot resolve the directory of the selected file.");
-                return;
-            }
-            if (!_useDirectoryMode && string.IsNullOrWhiteSpace(_crc32))
-            {
-                ShowInfo("dialog.info.hashUnavailable", "Failed to compute hash info. Please reselect the target file.");
-                return;
-            }
-            if (!_useDirectoryMode && PatchFileTextBox.Text is string p && !string.IsNullOrWhiteSpace(p))
-            {
-                // hashes already computed; verify they exist
-                SetHashTexts(_crc32 ?? "N/A", _md5 ?? "N/A", _sha1 ?? "N/A");
-            }
-
-
-            // Decide which .t3pp to use
-            string? patchPath = await ResolvePatchFilePathAsync();
-            if (string.IsNullOrWhiteSpace(patchPath))
-            {
-                AppendConsoleLine($"[INFO] {L("log.selection.cancelPatch", "User canceled patch selection.")}");
-                return;
-            }
-            ApplyPatchModeFromFile(patchPath);
-            if (!_useDirectoryMode && !VerifyHashes(targetPath))
-            {
-                ShowError("dialog.error.hashMismatch", "Hash mismatch or calculation failed. Please verify the file.");
-                return;
-            }
-
-            AppendConsoleLine(_useDirectoryMode
-                ? $"[INFO] {LF("log.patch.targetDirectory", "Target directory: {0}", gameRoot)}"
-                : $"[INFO] {LF("log.patch.targetFile", "Target file: {0} (will use its directory for patching)", targetPath)}");
-            AppendConsoleLine($"[INFO] {LF("log.selection.patch", "Selected patch: {0}", patchPath)}");
-
-            _patchCts = new CancellationTokenSource();
+            _isPatching = true;
+            SetPatchControlsEnabled(false);
+            SetNavigationEnabled(false);
 
             try
             {
+                string targetPath = DirectoryTextBox.Text.Trim();
+                if (_useDirectoryMode)
+                {
+                    if (string.IsNullOrEmpty(targetPath) || !Directory.Exists(targetPath))
+                    {
+                        ShowInfo("dialog.info.selectGameDirectory", "Please select a valid game directory.");
+                        return;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
+                    {
+                        ShowInfo("dialog.info.selectTargetFile", "Please select a valid target file.");
+                        return;
+                    }
+                }
+
+                string gameRoot = _useDirectoryMode
+                    ? targetPath
+                    : (Path.GetDirectoryName(targetPath) ?? targetPath);
+                if (string.IsNullOrWhiteSpace(gameRoot) || !Directory.Exists(gameRoot))
+                {
+                    ShowInfo("dialog.info.resolveDirectoryFailed", "Cannot resolve the directory of the selected file.");
+                    return;
+                }
+                if (!_useDirectoryMode && string.IsNullOrWhiteSpace(_crc32))
+                {
+                    ShowInfo("dialog.info.hashUnavailable", "Failed to compute hash info. Please reselect the target file.");
+                    return;
+                }
+                if (!_useDirectoryMode && PatchFileTextBox.Text is string p && !string.IsNullOrWhiteSpace(p))
+                {
+                    // hashes already computed; verify they exist
+                    SetHashTexts(_crc32 ?? "N/A", _md5 ?? "N/A", _sha1 ?? "N/A");
+                }
+
+
+                // Decide which .t3pp to use
+                string? previousPatchPath = _selectedPatchPath;
+                string? patchPath = await ResolvePatchFilePathAsync();
+                if (string.IsNullOrWhiteSpace(patchPath))
+                {
+                    AppendConsoleLine($"[INFO] {L("log.selection.cancelPatch", "User canceled patch selection.")}");
+                    return;
+                }
+
+                bool previousPatchValid = !string.IsNullOrWhiteSpace(previousPatchPath)
+                                       && File.Exists(previousPatchPath);
+                bool patchChanged = !previousPatchValid
+                                 || !string.Equals(previousPatchPath, patchPath, StringComparison.OrdinalIgnoreCase);
+                if (patchChanged)
+                {
+                    ApplyPatchModeFromFile(patchPath);
+                }
+                if (!_useDirectoryMode && !VerifyHashes(targetPath))
+                {
+                    ShowError("dialog.error.hashMismatch", "Hash mismatch or calculation failed. Please verify the file.");
+                    return;
+                }
+
+                AppendConsoleLine(_useDirectoryMode
+                    ? $"[INFO] {LF("log.patch.targetDirectory", "Target directory: {0}", gameRoot)}"
+                    : $"[INFO] {LF("log.patch.targetFile", "Target file: {0} (will use its directory for patching)", targetPath)}");
+                AppendConsoleLine($"[INFO] {LF("log.selection.patch", "Selected patch: {0}", patchPath)}");
+
+                _patchCts = new CancellationTokenSource();
+                var patchCts = _patchCts;
                 string patchFileLocal = patchPath; // avoid closure capturing UI variable
+                int applyResult = 0;
+                bool hashMismatchSeen = false;
+                bool hashMismatchCancelled = false;
+
+                void OnHashMismatch(string relPath, string context)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        string rel = string.IsNullOrWhiteSpace(relPath)
+                            ? L("dialog.hashMismatch.unknownPath", "Unknown path")
+                            : relPath;
+                        string ctx = string.IsNullOrWhiteSpace(context) ? string.Empty : $"{Environment.NewLine}{context}";
+                        string message = LF("dialog.hashMismatch.prompt", "File mismatch detected:\n{0}{1}\n\nContinue applying the patch?", rel, ctx);
+                        string title = L("dialog.hashMismatch.title", "Hash Mismatch");
+                        hashMismatchSeen = true;
+                        if (!ShowHashMismatchDialog(message, title))
+                        {
+                            hashMismatchCancelled = true;
+                            patchCts.Cancel();
+                        }
+                    });
+                }
 
                 await Task.Run(() =>
                 {
-                    if (_patchCts.IsCancellationRequested)
+                    if (patchCts.IsCancellationRequested)
                         return;
 
-                    T3ppDiff.ApplyPatchToDirectory(
+                    applyResult = T3ppDiff.ApplyPatchToDirectory(
                         patchFile: patchFileLocal,
                         targetRoot: gameRoot,
                         logger: AppendConsoleLine,
-                        dryRun: false);
+                        dryRun: false,
+                        hashMismatchHandler: OnHashMismatch);
                 });
 
+                if (_patchCts?.IsCancellationRequested == true)
+                {
+                    AppendConsoleLine($"[WARN] {L("log.patch.cancelledByUser", "Patch was cancelled by user after a mismatch prompt.")}");
+                    return;
+                }
+
+                if (applyResult != 0)
+                {
+                    if (hashMismatchSeen && !hashMismatchCancelled)
+                    {
+                        AppendConsoleLine($"[WARN] {LF("log.patch.mismatchContinued", "Patch completed after hash mismatches (code {0})", applyResult)}");
+                    }
+                    else
+                    {
+                        AppendConsoleLine($"[ERROR] {LF("log.patch.applyFailed", "Patch apply failed: {0}", applyResult)}");
+                        ShowError("dialog.error.patchApply", "Patch apply failed. Error code: {0}", applyResult);
+                        return;
+                    }
+                }
+
                 AppendConsoleLine($"[INFO] {L("log.patch.applySuccess", "Patch applied successfully.")}");
+                ShowInfo("dialog.info.patchComplete", "Patch applied successfully.");
 
             }
             catch (Exception ex)
@@ -311,7 +368,35 @@ namespace PatchGUIlite
             {
                 _patchCts?.Dispose();
                 _patchCts = null;
+                _isPatching = false;
+                SetNavigationEnabled(true);
+                SetPatchControlsEnabled(true);
             }
+        }
+
+        private void SetPatchControlsEnabled(bool enabled)
+        {
+            RunPatchButton.IsEnabled = enabled;
+            SelectPatchButton.IsEnabled = enabled;
+            bool hasPatch = !string.IsNullOrWhiteSpace(PatchFileTextBox.Text);
+            SelectDirButton.IsEnabled = enabled && hasPatch;
+        }
+
+        private void SetNavigationEnabled(bool enabled)
+        {
+            PatchTabRadio.IsEnabled = enabled;
+            GenerateTabRadio.IsEnabled = enabled;
+            RuleTabRadio.IsEnabled = enabled;
+            SettingsTabRadio.IsEnabled = enabled;
+            ModeSelectButton.IsEnabled = enabled;
+        }
+
+        private void SetGenerateControlsEnabled(bool enabled)
+        {
+            GenSelectSourceButton.IsEnabled = enabled;
+            GenSelectTargetButton.IsEnabled = enabled;
+            GenStartDiffButton.IsEnabled = enabled;
+            PackDirectoryCheckBox.IsEnabled = enabled;
         }
 
 
@@ -475,17 +560,27 @@ namespace PatchGUIlite
                     : LF("log.gen.detail.modeFileList", "Mode: File-list mode (handled as directory for now)");
                 AppendGenConsoleLine($"       {modeLine}");
 
+                _isGenerating = true;
+                SetGenerateControlsEnabled(false);
+                SetNavigationEnabled(false);
                 try
                 {
                     await Task.Run(() => T3ppDiff.CreateDirectoryDiff(sourcePath, targetPath, outFile));
                     var modeTag = packDirectory ? DirectoryPatchTag : FilePatchTag;
                     File.AppendAllText(outFile, $"{modeTag}");
                     AppendGenConsoleLine($"[INFO] {L("log.gen.completed", "Diff generation completed.")}");
+                    ShowInfo("dialog.info.patchGenerateComplete", "Patch generation completed.");
                 }
                 catch (Exception ex)
                 {
                     AppendGenConsoleLine($"[ERROR] {LF("log.gen.failed", "Diff generation failed: {0}", ex)}");
                     ShowError("dialog.error.pathSelect", "Failed to select path: {0}", ex.Message);
+                }
+                finally
+                {
+                    _isGenerating = false;
+                    SetNavigationEnabled(true);
+                    SetGenerateControlsEnabled(true);
                 }
             }
             else
@@ -533,6 +628,9 @@ namespace PatchGUIlite
                 string modeLine = LF("log.gen.detail.modeFile", "Mode: File diff");
                 AppendGenConsoleLine($"       {modeLine}");
 
+                _isGenerating = true;
+                SetGenerateControlsEnabled(false);
+                SetNavigationEnabled(false);
                 string tempOldDir = Path.Combine(Path.GetTempPath(), "t3pp_old_" + Guid.NewGuid().ToString("N"));
                 string tempNewDir = Path.Combine(Path.GetTempPath(), "t3pp_new_" + Guid.NewGuid().ToString("N"));
                 string relativeName = Path.GetFileName(targetPath);
@@ -559,6 +657,7 @@ namespace PatchGUIlite
                     await Task.Run(() => T3ppDiff.CreateDirectoryDiff(tempOldDir, tempNewDir, outFile));
                     File.AppendAllText(outFile, $"{FilePatchTag}");
                     AppendGenConsoleLine($"[INFO] {L("log.gen.completed", "Diff generation completed.")}");
+                    ShowInfo("dialog.info.patchGenerateComplete", "Patch generation completed.");
                 }
                 catch (Exception ex)
                 {
@@ -569,6 +668,9 @@ namespace PatchGUIlite
                 {
                     TryDeleteDirectory(tempOldDir);
                     TryDeleteDirectory(tempNewDir);
+                    _isGenerating = false;
+                    SetNavigationEnabled(true);
+                    SetGenerateControlsEnabled(true);
                 }
             }
         }
@@ -603,6 +705,17 @@ namespace PatchGUIlite
 
         private MessageBoxResult ShowUpdate(string key, string fallback, MessageBoxButton buttons, MessageBoxImage image, params object[] args) =>
             ShowMessage(key, fallback, "dialog.title.update", "Update", buttons, image, args);
+
+        private bool ShowHashMismatchDialog(string message, string title)
+        {
+            var result = System.Windows.MessageBox.Show(
+                this,
+                message,
+                title,
+                MessageBoxButton.OKCancel,
+                MessageBoxImage.Warning);
+            return result == MessageBoxResult.OK;
+        }
 
         private void AppendConsoleLine(string line)
         {
@@ -690,7 +803,7 @@ namespace PatchGUIlite
                 return;
             }
 
-            var hashes = ComputeHashes(path);
+            var hashes = HashUtility.ComputeFileHashes(path);
             if (hashes == null)
             {
                 _crc32 = _md5 = _sha1 = null;
@@ -723,7 +836,7 @@ namespace PatchGUIlite
 
         private bool VerifyHashes(string path)
         {
-            var hashes = ComputeHashes(path);
+            var hashes = HashUtility.ComputeFileHashes(path);
             if (hashes == null)
                 return false;
 
@@ -743,53 +856,6 @@ namespace PatchGUIlite
             }
 
             return match;
-        }
-
-        private static (string crc, string md5, string sha1)? ComputeHashes(string path)
-        {
-            try
-            {
-                byte[] data = File.ReadAllBytes(path);
-
-                uint crc = 0xFFFFFFFF;
-                foreach (byte b in data)
-                {
-                    crc = Crc32Table[(crc ^ b) & 0xFF] ^ (crc >> 8);
-                }
-                crc ^= 0xFFFFFFFF;
-                string crcHex = crc.ToString("X8");
-
-                using var md5 = MD5.Create();
-                string md5Hex = Convert.ToHexString(md5.ComputeHash(data));
-
-                using var sha1 = SHA1.Create();
-                string sha1Hex = Convert.ToHexString(sha1.ComputeHash(data));
-
-                return (crcHex, md5Hex, sha1Hex);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static uint[] BuildCrc32Table()
-        {
-            const uint poly = 0xEDB88320;
-            var table = new uint[256];
-            for (uint i = 0; i < table.Length; i++)
-            {
-                uint entry = i;
-                for (int j = 0; j < 8; j++)
-                {
-                    if ((entry & 1) == 1)
-                        entry = (entry >> 1) ^ poly;
-                    else
-                        entry >>= 1;
-                }
-                table[i] = entry;
-            }
-            return table;
         }
 
         private static void TryDeleteDirectory(string? path)
@@ -820,11 +886,11 @@ namespace PatchGUIlite
             RuleTabRadio.Content = L("nav.rule", "Rules");
             SettingsTabRadio.Content = L("nav.settings", "Settings");
 
-            GameSelectButton.Content = L("button.gameSelect", "Select Mode");
-            SelectedGameText.Text = _useDirectoryMode
+            ModeSelectButton.Content = L("button.modeSelect", "Select Mode");
+            SelectedModeText.Text = _useDirectoryMode
                 ? L("label.currentModeDirectory", "Current mode: Directory")
                 : L("label.currentModeFile", "Current mode: File");
-            if (GameSelectButton.ContextMenu is ContextMenu modeMenu)
+            if (ModeSelectButton.ContextMenu is ContextMenu modeMenu)
             {
                 foreach (object? item in modeMenu.Items)
                 {
