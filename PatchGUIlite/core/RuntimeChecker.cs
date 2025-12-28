@@ -12,7 +12,7 @@ namespace PatchGUIlite.Core
     internal static class RuntimeChecker
     {
         private const string DesktopRuntimeFolder = "Microsoft.WindowsDesktop.App";
-        private const string DownloadUrl = "https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime";
+        private const string DownloadUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/8.0.22/windowsdesktop-runtime-8.0.22-win-x64.exe";
 
         public static bool EnsureWindowsDesktopRuntime()
         {
