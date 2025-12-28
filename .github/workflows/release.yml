@@ -29,10 +29,10 @@ jobs:
           --self-contained false
           -o artifacts/framework-win-x64
 
-      - name: Remove Files from artifacts
+      - name: Remove PDB from artifacts
         shell: pwsh
         run: |
-          Get-ChildItem -Path artifacts/framework-win-x64 -Recurse -Include *.pdb,*.deps.json,PatchGUIlite.runtimeconfig.json | Remove-Item -Force
+          Get-ChildItem -Path artifacts/framework-win-x64 -Recurse -Include *.pdb | Remove-Item -Force
 
       - name: Zip artifacts
         shell: pwsh

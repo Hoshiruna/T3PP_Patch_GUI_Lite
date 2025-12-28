@@ -127,7 +127,5 @@
   "log.gen.detail.modeFileList": "模式：文件列表（暂按目录处理）",
   "log.gen.detail.modeFile": "模式：文件差分",
   "log.gen.completed": "差分生成完成。",
-  "log.gen.failed": "差分生成失败：{0}",
-  "runtime.missing.title": "缺少运行时",
-  "runtime.missing.message": "缺少必需的 .NET 8.0 Windows Desktop Runtime。\n现在将打开下载页面，请安装后重新启动应用。"
+  "log.gen.failed": "差分生成失败：{0}"
 }

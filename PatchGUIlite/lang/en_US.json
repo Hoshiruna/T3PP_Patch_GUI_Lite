@@ -4,13 +4,11 @@
   "nav.generate": "Generate Patch",
   "nav.rule": "Rules",
   "nav.settings": "Settings",
-
   "button.modeSelect": "Select Mode",
   "label.currentModeDirectory": "Current mode: Directory",
   "label.currentModeFile": "Current mode: File",
   "menu.mode.directory": "Directory Mode",
   "menu.mode.file": "File Mode",
-
   "button.selectDir": "Select Target",
   "tooltip.selectDir": "Browse target path",
   "placeholder.gameDir": "Select a target directory...",
@@ -18,10 +16,8 @@
   "button.selectPatch": "Select Patch",
   "tooltip.selectPatch": "Choose a .t3pp patch file",
   "placeholder.patchFile": "Select a patch file...",
-
   "button.runPatch": "Apply Patch",
   "label.hashInfo": "Info",
-
   "gen.button.source": "Select Folder",
   "gen.tooltip.source": "Choose the original folder (before changes)",
   "gen.placeholder.source": "Pick the original folder...",
@@ -37,7 +33,6 @@
   "gen.packDirectory": "Package directory",
   "gen.packDirectory.tooltip": "On: diff by directory; Off: file-list mode (backend can switch).",
   "gen.button.start": "Generate Patch",
-
   "settings.title": "Settings",
   "settings.languageSection": "Language",
   "settings.languageLabel": "UI Language",
@@ -61,11 +56,9 @@
   "update.status.downloadFailed": "Download failed.",
   "update.status.extractFailed": "Invalid update package.",
   "update.status.applyFailed": "Failed to start updater.",
-
   "dialog.title.info": "Info",
   "dialog.title.error": "Error",
   "dialog.title.update": "Update",
-
   "dialog.title.selectPatchFile": "Select T3PP patch file",
   "dialog.title.selectTargetDirectory": "Select target directory",
   "dialog.title.selectTargetFile": "Select target file",
@@ -75,7 +68,6 @@
   "dialog.description.selectTargetDirectory": "Select target directory (after changes)",
   "dialog.filter.patch": "Touhou 3rd-party Patch (*.t3pp)|*.t3pp|All files (*.*)|*.*",
   "dialog.filter.allFiles": "All files (*.*)|*.*",
-
   "dialog.error.pathSelect": "Failed to select path: {0}",
   "dialog.info.patchRunning": "Patch is already running.",
   "dialog.info.selectGameDirectory": "Please select a valid game directory.",
@@ -100,7 +92,6 @@
   "dialog.info.unverifiedPatch": "This is an unverified patch; exercise caution when applying.",
   "dialog.info.detectedDirectoryPatch": "Current patch detected as directory patch. Switched to directory mode.",
   "dialog.info.detectedFilePatch": "Current patch detected as file patch. Switched to file mode.",
-
   "dialog.update.remoteVersionMissing": "Failed to read the remote version file from GitHub.",
   "dialog.update.alreadyLatest": "Already up to date.",
   "dialog.update.releaseMissing": "Failed to load release information from GitHub.",
@@ -111,7 +102,6 @@
   "dialog.update.confirmApply": "Update downloaded.{0}Local: {1}{0}Remote: {2}{0}{0}The app will close to install the update. Continue?",
   "dialog.update.updaterFailed": "Failed to start the updater: {0}",
   "dialog.update.failed": "Update failed: {0}",
-
   "log.mode.switchedDirectory": "Switched to directory mode. Please reselect the directory.",
   "log.mode.switchedFile": "Switched to file mode. Please reselect the file.",
   "log.selection.directory": "Selected directory: {0}",
@@ -137,8 +127,5 @@
   "log.gen.detail.modeFileList": "Mode: File-list mode (handled as directory for now)",
   "log.gen.detail.modeFile": "Mode: File diff",
   "log.gen.completed": "Diff generation completed.",
-  "log.gen.failed": "Diff generation failed: {0}",
-
-  "runtime.missing.title": "Missing Runtime",
-  "runtime.missing.message": "Required .NET 8.0 Windows Desktop Runtime is missing.\nThe download page will now open. Install it, then restart the app."
+  "log.gen.failed": "Diff generation failed: {0}"
 }

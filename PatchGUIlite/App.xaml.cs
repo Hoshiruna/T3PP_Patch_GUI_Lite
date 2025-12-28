@@ -1,6 +1,5 @@
-﻿using System.Windows;
+using System.Windows;
 using Application = System.Windows.Application;
-using PatchGUIlite.Core;
 
 namespace PatchGUIlite
 {
@@ -12,12 +11,6 @@ namespace PatchGUIlite
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
-            if (!RuntimeChecker.EnsureWindowsDesktopRuntime())
-            {
-                Shutdown();
-            }
         }
     }
 }
-
