@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <None Remove="Highlighting\Json.xshd" />
-    <None Remove="res\xdelta3.exe" />
     <None Remove="T3ppNativelite_Debug_x64.dll" />
     <None Remove="T3ppNativelite_Release_x64.dll" />
   </ItemGroup>
@@ -39,10 +38,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Highlighting\Json.xshd" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="res\xdelta3.exe" />
   </ItemGroup>
 
   <!-- Copy localization JSONs next to the built executable -->

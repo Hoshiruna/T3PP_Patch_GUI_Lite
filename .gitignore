@@ -7,6 +7,40 @@ obj/
 *.pdb
 *.log
 
+# Xdelta3
+*.o
+*~
+.deps
+.dirstamp
+INSTALL
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache
+build
+compile
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+config.sub
+configure
+depcomp
+libtool
+libtool.m4
+ltmain.sh
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
+missing
+stamp-h1
+xdelta3/xdelta3
+xdelta3decode
+xdelta3regtest
+
 # Native build outputs
 x64/
 T3ppNative/x64/
@@ -20,3 +54,10 @@ T3ppNativeLite/
 *.zip
 *.slnx
 !PatchGUIlite/res/xdelta3.exe
+
+# CMake
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake-install.cmake
+install_manifest.txt
