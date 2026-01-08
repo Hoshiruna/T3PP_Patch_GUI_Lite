@@ -202,8 +202,9 @@ namespace PatchGUIlite.Core
                 string args = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" -ProcessId {processId} -SourceDir \"{sourceDir}\" -TargetDir \"{targetDir}\" -ExePath \"{exePath}\"";
                 var startInfo = new ProcessStartInfo("powershell", args)
                 {
-                    UseShellExecute = false,
-                    CreateNoWindow = true
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal
                 };
 
                 Process.Start(startInfo);
