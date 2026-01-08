@@ -17,21 +17,20 @@ Get the full version: [Here](https://github.com/CNTianQi233/T3PP-PatchGUI-Public
 
 ## Requirements
 - Windows, .NET 8 SDK (desktop workload) to build; .NET 8 Desktop Runtime to run.
-- Visual Studio 2022 (optional) or `dotnet` CLI.
-- Native helper: `T3ppNativelite_Debug_x64.dll` / `T3ppNativelite_Release_x64.dll` built via CMake or provided.
+- Visual Studio 2022 (optional) for WPF; C++ workload only if building the native helper.
+- Native helper: prebuilt `T3ppNativelite_Debug_x64.dll` / `T3ppNativelite_Release_x64.dll` live in `PatchGUIlite/` or build them from `T3ppNativeLite/`.
 
 ## Build
-### Native (CMake)
-```bash
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-cmake --build build --config Release
-```
-
-### WPF app
+### WPF app only (uses prebuilt native DLLs)
 ```bash
 dotnet restore PatchGUIlite/PatchGUIlite.csproj
 dotnet build   PatchGUIlite/PatchGUIlite.csproj -c Debug
 dotnet build   PatchGUIlite/PatchGUIlite.csproj -c Release
+```
+
+### Native helper (optional)
+```bash
+msbuild T3ppNativeLite/T3ppNativeLite.vcxproj /m /p:Configuration=Release /p:Platform=x64
 ```
 
 ## Run

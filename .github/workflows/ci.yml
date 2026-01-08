@@ -14,27 +14,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Configure native (CMake)
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DUSE_PREBUILT_T3PP_NATIVE=ON
-
-      - name: Build native (Release)
-        run: cmake --build build --config Release
-
-      - name: Copy native DLL to project
-        shell: pwsh
-        run: |
-          Copy-Item build/bin/T3ppNativelite_Release_x64.dll PatchGUIlite/T3ppNativelite_Release_x64.dll -Force
-
       - name: Restore
         run: dotnet restore PatchGUIlite/PatchGUIlite.csproj
 
-      - name: Build (Release)
-        run: dotnet build PatchGUIlite/PatchGUIlite.csproj -c Release --no-restore
+      - name: Build (Release x64)
+        run: dotnet build PatchGUIlite/PatchGUIlite.csproj -c Release -p:Platform=x64 --no-restore

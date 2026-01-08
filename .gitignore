@@ -57,7 +57,13 @@ T3ppNativeLite/
 
 # CMake
 build/
+out/
 CMakeFiles/
 CMakeCache.txt
+CMakeScripts/
 cmake-install.cmake
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+compile_commands.json
 install_manifest.txt
